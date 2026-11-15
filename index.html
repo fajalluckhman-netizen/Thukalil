@@ -1416,6 +1416,14 @@
     <button class="admin-lock-btn" onclick="showPage('web-admin')" title="Admin Portal Access">🔒</button>
   </footer>
 
+  <!-- Memorial tribute-photo modal -- placed outside every .page section
+       (unlike #kinModal, which lives inside the Family Tree page and is
+       only ever opened from there) so it's reachable from the Memorial
+       Wall on the Home page regardless of which tab is active. -->
+  <div class="kin-modal" id="memModal" onclick="if(event.target===this)closeMemModal()">
+    <div class="kin-box" id="memBox" style="max-width:560px;"></div>
+  </div>
+
   <!-- ==================== APPLICATION SCRIPT ==================== -->
   <script>
     /* 
@@ -2649,6 +2657,31 @@
       `).join('');
     }
 
+    /* =====================================================================
+       8b. MEMORIAL TRIBUTE PHOTOS
+       Anyone can add a photo to an "In Loving Memory" profile by clicking
+       its card. Whichever photo was added FIRST (oldest, not the most
+       recent) becomes that card's cover photo -- this is deliberate: it's
+       the community's crowd-sourced answer to a profile that often has no
+       photo of its own, and it should settle on one rather than keep
+       flipping to whatever was added most recently.
+       ===================================================================== */
+    let memorialPhotosByMember = {};
+
+    async function loadMemorialPhotos() {
+      if (!db.isReady()) return;
+      const data = await db.select("memorial_photos", "order=created_at.asc");
+      if (!data || !Array.isArray(data)) return;
+      const byMember = {};
+      data.forEach(p => { (byMember[p.member_id] = byMember[p.member_id] || []).push(p); });
+      memorialPhotosByMember = byMember;
+    }
+
+    function memorialCoverPhoto(m) {
+      const tributes = memorialPhotosByMember[m.id];
+      return (tributes && tributes.length ? tributes[0].photo_url : "") || m.photo_url || "";
+    }
+
     // The Memorial Wall -- every verified member marked "In Loving Memory".
     function renderMemorialWall(deceasedMembers) {
       const container = $("#memorialWallGrid");
@@ -2658,15 +2691,64 @@
         return;
       }
       container.innerHTML = deceasedMembers.map(m => `
-        <div class="card" style="display:flex; gap:18px; align-items:flex-start;">
-          <img src="${m.photo_url || ''}" alt="${ftEsc(m.name)}" style="width:72px; height:72px; border-radius:50%; object-fit:cover; border:2px solid var(--accent); flex:none; filter:grayscale(.4);" onerror="this.src='https://placehold.co/150x150/0f161e/d4af37?text=%F0%9F%95%8A%EF%B8%8F'">
+        <div class="card" style="display:flex; gap:18px; align-items:flex-start; cursor:pointer;" onclick="openMemorialPhotos('${m.id}')" title="Click to view or add a photo">
+          <img src="${ftEsc(memorialCoverPhoto(m))}" alt="${ftEsc(m.name)}" style="width:72px; height:72px; border-radius:50%; object-fit:cover; border:2px solid var(--accent); flex:none; filter:grayscale(.4);" onerror="this.src='https://placehold.co/150x150/0f161e/d4af37?text=%F0%9F%95%8A%EF%B8%8F'">
           <div>
             <h3 style="font-size:19px; margin-bottom:2px;">${ftEsc(m.name)}</h3>
             <div class="muted" style="font-size:12px; margin-bottom:8px;">${ftEsc(formatLifeYears(m) || '')}${m.home_region ? ' · ' + ftEsc(m.home_region) : ''}</div>
             <p style="font-size:14px; color:var(--muted);">${ftEsc(m.bio || 'Forever remembered and cherished by the Thukalil family.')}</p>
+            <p class="muted" style="font-size:11px; margin-top:8px;">📷 Click to view or add a photo</p>
           </div>
         </div>
       `).join('');
+    }
+
+    function openMemorialPhotos(memberId) {
+      const m = currentMembers.find(x => String(x.id) === String(memberId));
+      if (!m) return;
+      const tributes = memorialPhotosByMember[memberId] || [];
+      $("#memBox").innerHTML = `
+        <button class="kin-close" onclick="closeMemModal()" aria-label="Close">×</button>
+        <h3>${ftEsc(m.name)}</h3>
+        <div class="muted" style="font-size:13px; margin-top:-4px; margin-bottom:14px;">${ftEsc(formatLifeYears(m) || '')} · In Loving Memory</div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:18px;">
+          ${tributes.length ? tributes.map((p, i) => `
+            <div style="position:relative;">
+              <img src="${ftEsc(p.photo_url)}" alt="" style="width:96px; height:96px; object-fit:cover; border-radius:12px; border:2px solid ${i === 0 ? 'var(--accent)' : 'var(--line)'};" onerror="this.style.display='none'">
+              ${i === 0 ? `<span class="fbadge" style="position:absolute; bottom:-6px; right:-6px; width:auto; padding:0 6px; font-size:9px;" title="Oldest photo -- shown on the memorial wall">Cover</span>` : ''}
+            </div>
+          `).join('') : `<p class="muted" style="font-size:13px;">No tribute photos added yet -- be the first to add one.</p>`}
+        </div>
+        <label class="btn btn-outline" style="cursor:pointer; display:inline-block;">
+          + Add a Photo
+          <input type="file" accept="image/*" style="display:none" onchange="submitMemorialPhoto(event, '${memberId}')">
+        </label>
+        <p class="muted" style="font-size:11px; margin-top:10px;">The first photo ever added becomes the one shown on the memorial wall.</p>
+      `;
+      $("#memModal").classList.add("open");
+    }
+
+    function closeMemModal() { $("#memModal").classList.remove("open"); }
+
+    async function submitMemorialPhoto(e, memberId) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (evt) => {
+        const photo_url = evt.target.result;
+        const row = { member_id: memberId, photo_url };
+        if (db.isReady()) {
+          await db.insert("memorial_photos", row);
+          await loadMemorialPhotos();
+        } else {
+          row.id = Date.now().toString();
+          row.created_at = new Date().toISOString();
+          (memorialPhotosByMember[memberId] = memorialPhotosByMember[memberId] || []).push(row);
+        }
+        openMemorialPhotos(memberId);
+        renderMemorialWall(currentMembers.filter(m => m.status === 'verified' && m.is_deceased));
+      };
+      reader.readAsDataURL(file);
     }
 
     /* =====================================================================
@@ -3260,8 +3342,15 @@
     showPage((() => { try { return location.hash.slice(1); } catch (e) { return ""; } })() || "web-home");
     const themeReady = loadSavedThemeConfig().catch(() => {});
     const membersReady = loadMembers().catch(() => {});
-    // intro starts once the saved theme + member photos are in (max 2s wait)
-    runIntro(Promise.race([Promise.all([themeReady, membersReady]), new Promise(r => setTimeout(r, 2000))]));
+    const memorialPhotosReady = loadMemorialPhotos().catch(() => {});
+    // The intro is supposed to show real registered members' photos, not
+    // the placeholder demo faces -- so it waits for the saved theme + the
+    // real member data to actually arrive. The old 2-second cap often won,
+    // racing ahead of a normal Supabase fetch and locking the intro into
+    // showing the hardcoded demo people instead. A 6-second cap still keeps
+    // the site from stalling forever if the database is unreachable, but
+    // gives a normal fetch enough room to finish first.
+    runIntro(Promise.race([Promise.all([themeReady, membersReady]), new Promise(r => setTimeout(r, 6000))]));
     loadAchievements();
     loadGuestbook();
     loadHomeFeatures();
@@ -3273,6 +3362,12 @@
       const verified = currentMembers.filter(m => m.status === 'verified');
       renderRegionGrid(verified);
       renderMemorialWall(verified.filter(m => m.is_deceased));
+    });
+    // Tribute photos load in parallel with members -- once they're in,
+    // re-render so any memorial card that already has a tribute photo
+    // shows it as its cover straight away.
+    memorialPhotosReady.then(() => {
+      renderMemorialWall(currentMembers.filter(m => m.status === 'verified' && m.is_deceased));
     });
   </script>
 
