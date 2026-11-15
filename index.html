@@ -1288,6 +1288,7 @@
           <div style="display: flex; gap: 10px; flex-wrap:wrap; margin-bottom: 30px; border-bottom: 1px solid var(--line); padding-bottom: 14px;">
             <button class="btn" onclick="showAdminSub('queue')">Pending Verifications</button>
             <button class="btn btn-outline" onclick="showAdminSub('registered')">Registered People</button>
+            <button class="btn btn-outline" onclick="showAdminSub('photos')">Photo Approvals</button>
             <button class="btn btn-outline" onclick="showAdminSub('moderation')">Manage Tributes</button>
             <button class="btn btn-outline" onclick="showAdminSub('achievements')">Manage Achievements</button>
             <button class="btn btn-outline" onclick="showAdminSub('settings')">Site Configurator</button>
@@ -1311,6 +1312,13 @@
               <input type="text" id="registeredSearch" placeholder="Search registered members...">
             </div>
             <div id="adminRegisteredList" class="grid"></div>
+          </div>
+
+          <!-- SUBTAB 1c: TRIBUTE PHOTO APPROVALS -->
+          <div id="adminSubPhotos" style="display: none;">
+            <h3 style="font-size: 24px; margin-bottom: 14px;">Tribute Photo Approvals</h3>
+            <p class="muted" style="margin-bottom: 20px;">Anyone can submit a photo from the Family Tree -- for a registered "In Loving Memory" profile, or for someone who was only ever named as a parent/sibling/spouse and never registered. Nothing submitted goes live until it's approved here.</p>
+            <div id="adminPhotoList" class="grid"></div>
           </div>
 
           <!-- SUBTAB 2: GUESTBOOK MODERATION & HOMEPAGE FEATURE CHECKBOXES -->
@@ -2293,10 +2301,12 @@
       // it never reads as if it belongs to the person above it.
       if (extra && extra.indexOf("spouse") !== -1 && !p.parentKey) sub = sub ? `Married in · ${sub}` : "Married into the family";
       const badge = p.children.length ? `<span class="fbadge" title="${p.children.length} child(ren)">${p.children.length}</span>` : "";
-      // For an "In Loving Memory" profile, prefer whatever tribute photo was
-      // added first (see memorialCoverPhoto) so a crowd-added photo shows
-      // right on the tree box itself, not just inside the popup.
-      const photoSrc = m && m.is_deceased ? memorialCoverPhoto(m) : (m && m.photo_url);
+      // For an "In Loving Memory" profile, or for someone named but never
+      // registered (a "ghost" box), prefer whatever approved tribute photo
+      // was added first (see memorialCoverPhotoFor) so a crowd-added photo
+      // shows right on the tree box itself, not just inside the popup.
+      const showsTributes = (m && m.is_deceased) || (!m && !p.virtual);
+      const photoSrc = showsTributes ? memorialCoverPhotoFor(p) : (m && m.photo_url);
       const img = photoSrc ? `<img src="${ftEsc(photoSrc)}" alt="" loading="lazy" onerror="this.style.display='none'">` : "";
       const deceasedCls = m && m.is_deceased ? "deceased" : "";
       const dove = m && m.is_deceased ? `<span class="fbadge" title="In Loving Memory" style="right:auto; left:-4px; background:rgb(var(--deep-rgb));">🕊️</span>` : "";
@@ -2416,9 +2426,11 @@
       const spouses = [...p.spouses].map(byKey).filter(Boolean);
       const husband = p.spouseOf && byKey(p.spouseOf);
       const rel = (title, items) => items.length ? `<div class="kin-rel"><b>${title}</b>${items.join("")}</div>` : "";
-      // For an "In Loving Memory" profile, show whichever tribute photo was
-      // added first (see memorialCoverPhoto) as the main photo here too.
-      const photoSrc = m && m.is_deceased ? memorialCoverPhoto(m) : (m && m.photo_url);
+      // For an "In Loving Memory" profile, or for someone named but never
+      // registered, show whichever approved tribute photo was added first
+      // (see memorialCoverPhotoFor) as the main photo here too.
+      const showsTributes = (m && m.is_deceased) || (!m && !p.virtual);
+      const photoSrc = showsTributes ? memorialCoverPhotoFor(p) : (m && m.photo_url);
       const photo = photoSrc ? `<img class="kin-photo" src="${ftEsc(photoSrc)}" alt="" onerror="this.style.display='none'">` : `<div class="kin-photo finit" style="display:flex;align-items:center;justify-content:center;font-size:40px;">${ftEsc(p.name.charAt(0).toUpperCase())}</div>`;
       const years = m ? formatLifeYears(m) : "";
       $("#kinBox").innerHTML = `
@@ -2437,16 +2449,21 @@
         ${rel("Brothers & Sisters", sibs.map(link))}
         ${rel(husband ? "Married to" : "Spouse", (husband ? [husband] : spouses).map(link))}
         ${rel("Children", p.children.map(link))}
-        ${m && m.is_deceased ? renderTributeGallery(p) : ""}`;
+        ${showsTributes ? renderTributeGallery(p) : ""}`;
       $("#kinModal").classList.add("open");
     }
 
     // Tribute-photo gallery + "Add a Photo" control, shown inside the
-    // relatives popup for an "In Loving Memory" profile only -- clicking
-    // that person's box in the Family Tree is how anyone adds a photo.
+    // relatives popup for an "In Loving Memory" profile AND for anyone
+    // only ever named as a parent/sibling/spouse and never registered
+    // (a "ghost" box) -- clicking that person's box in the Family Tree is
+    // how anyone adds a photo. Every photo waits for admin approval
+    // before it shows up here, on the tree box, or on the memorial wall.
     function renderTributeGallery(p) {
       const m = p.member;
-      const tributes = memorialPhotosByMember[m.id] || [];
+      const key = tributeKeyFor(m && m.id, p.key);
+      const tributes = memorialPhotosByPerson[key] || [];
+      const pendingCount = memorialPhotosPending.filter(ph => tributeKeyFor(ph.member_id, ph.person_key) === key).length;
       return `
         <div class="kin-rel">
           <b>Tribute Photos</b>
@@ -2454,15 +2471,16 @@
             ${tributes.length ? tributes.map((ph, i) => `
               <div style="position:relative;">
                 <img src="${ftEsc(ph.photo_url)}" alt="" style="width:64px; height:64px; object-fit:cover; border-radius:10px; border:2px solid ${i === 0 ? "var(--accent)" : "var(--line)"};" onerror="this.style.display='none'">
-                ${i === 0 ? `<span class="fbadge" style="position:absolute; bottom:-6px; right:-6px; width:auto; padding:0 5px; font-size:8px;" title="Oldest photo -- shown on this person's card">Cover</span>` : ""}
+                ${i === 0 ? `<span class="fbadge" style="position:absolute; bottom:-6px; right:-6px; width:auto; padding:0 5px; font-size:8px;" title="Oldest approved photo -- shown on this person's card">Cover</span>` : ""}
               </div>
-            `).join("") : `<p class="muted" style="font-size:12px;">No tribute photos yet -- be the first to add one.</p>`}
+            `).join("") : `<p class="muted" style="font-size:12px;">No approved tribute photos yet -- be the first to add one.</p>`}
           </div>
+          ${pendingCount ? `<p class="muted" style="font-size:11px; margin-bottom:10px;">⏳ ${pendingCount} photo${pendingCount === 1 ? "" : "s"} submitted and awaiting admin approval.</p>` : ""}
           <label class="btn btn-outline" style="cursor:pointer; display:inline-block; font-size:13px; padding:8px 16px;">
             + Add a Photo
-            <input type="file" accept="image/*" style="display:none" onchange="submitMemorialPhoto(event, '${m.id}', '${ftEsc(p.key)}')">
+            <input type="file" accept="image/*" style="display:none" onchange="submitMemorialPhoto(event, ${m ? `'${ftEsc(m.id)}'` : "null"}, '${ftEsc(p.key)}', '${ftEsc(p.name)}', '${ftEsc(p.key)}')">
           </label>
-          <p class="muted" style="font-size:11px; margin-top:8px;">The first photo ever added becomes the one shown on this person's tree box.</p>
+          <p class="muted" style="font-size:11px; margin-top:8px;">Every photo is reviewed by an admin before it appears. The first approved photo becomes the one shown on this person's tree box.</p>
         </div>`;
     }
     function closeKin() { $("#kinModal").classList.remove("open"); }
@@ -2684,26 +2702,55 @@
 
     /* =====================================================================
        8b. MEMORIAL TRIBUTE PHOTOS
-       Anyone can add a photo to an "In Loving Memory" profile by clicking
-       its card. Whichever photo was added FIRST (oldest, not the most
-       recent) becomes that card's cover photo -- this is deliberate: it's
-       the community's crowd-sourced answer to a profile that often has no
-       photo of its own, and it should settle on one rather than keep
-       flipping to whatever was added most recently.
+       Anyone can add a photo to a deceased "In Loving Memory" profile, OR
+       to someone who was only ever named as a parent/sibling/spouse and
+       never registered themselves (a "ghost" box in the Family Tree), by
+       clicking that person's card. Every new photo starts out "pending"
+       and stays invisible to everyone but the admin's moderation queue
+       until it's approved there -- only approved photos ever show on a
+       card, in the relatives popup, or on the Home page memorial wall.
+       Once approved, whichever photo was added FIRST (oldest, not most
+       recent) becomes that person's cover photo -- the community's
+       crowd-sourced answer to a profile that often has no photo of its
+       own, settling on one rather than flipping to whatever was most
+       recently approved.
+       A registered person is keyed by their real member_id (a uuid); an
+       unregistered person has no family_members row at all, so they're
+       keyed instead by personKey -- the same normalized name key
+       (ftNorm) the Family Tree itself already uses to identify that box.
        ===================================================================== */
-    let memorialPhotosByMember = {};
+    let memorialPhotosByPerson = {};   // approved only -- what everyone sees
+    let memorialPhotosPending = [];    // awaiting admin review (admin only)
+
+    function tributeKeyFor(memberId, personKey) { return memberId || ("k:" + personKey); }
 
     async function loadMemorialPhotos() {
       if (!db.isReady()) return;
       const data = await db.select("memorial_photos", "order=created_at.asc");
       if (!data || !Array.isArray(data)) return;
-      const byMember = {};
-      data.forEach(p => { (byMember[p.member_id] = byMember[p.member_id] || []).push(p); });
-      memorialPhotosByMember = byMember;
+      const byPerson = {}, pending = [];
+      data.forEach(ph => {
+        const key = tributeKeyFor(ph.member_id, ph.person_key);
+        if (ph.status === 'verified') (byPerson[key] = byPerson[key] || []).push(ph);
+        else pending.push(ph);
+      });
+      memorialPhotosByPerson = byPerson;
+      memorialPhotosPending = pending;
     }
 
+    // p is a Family Tree person object (from FT.people) -- works the same
+    // for a registered member (p.member set) and an unregistered "ghost"
+    // box (p.member unset).
+    function memorialCoverPhotoFor(p) {
+      const m = p.member;
+      const tributes = memorialPhotosByPerson[tributeKeyFor(m && m.id, p.key)];
+      return (tributes && tributes.length ? tributes[0].photo_url : "") || (m && m.photo_url) || "";
+    }
+
+    // Kept for the Home page memorial wall, which only ever deals with
+    // registered, verified, deceased members and has no FT person object.
     function memorialCoverPhoto(m) {
-      const tributes = memorialPhotosByMember[m.id];
+      const tributes = memorialPhotosByPerson[tributeKeyFor(m.id, null)];
       return (tributes && tributes.length ? tributes[0].photo_url : "") || m.photo_url || "";
     }
 
@@ -2731,25 +2778,27 @@
     }
 
     // Fired from the "+ Add a Photo" control inside the Family Tree's
-    // relatives popup (renderTributeGallery, above). treeKey re-opens that
-    // same popup afterwards so the person adding the photo sees it land.
-    async function submitMemorialPhoto(e, memberId, treeKey) {
+    // relatives popup (renderTributeGallery, below) -- works the same for
+    // a deceased registered member and for someone who was only ever
+    // named and never registered. Every photo starts "pending": it sits
+    // in the admin's moderation queue and does not appear anywhere until
+    // approved. treeKey re-opens the same popup afterwards so the person
+    // adding the photo sees it land in the "awaiting approval" note.
+    async function submitMemorialPhoto(e, memberId, personKey, personName, treeKey) {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = async (evt) => {
         const photo_url = evt.target.result;
-        const row = { member_id: memberId, photo_url };
+        const row = { member_id: memberId || null, person_key: memberId ? null : personKey, person_name: personName || "", photo_url, status: 'pending' };
         if (db.isReady()) {
           await db.insert("memorial_photos", row);
           await loadMemorialPhotos();
         } else {
           row.id = Date.now().toString();
           row.created_at = new Date().toISOString();
-          (memorialPhotosByMember[memberId] = memorialPhotosByMember[memberId] || []).push(row);
+          memorialPhotosPending.push(row);
         }
-        renderFamilyTree(currentMembers);
-        renderMemorialWall(currentMembers.filter(mm => mm.status === 'verified' && mm.is_deceased));
         if (treeKey) openKin(treeKey);
       };
       reader.readAsDataURL(file);
@@ -3064,12 +3113,14 @@
     function showAdminSub(sub) {
       $("#adminSubQueue").style.display = sub === 'queue' ? 'block' : 'none';
       $("#adminSubRegistered").style.display = sub === 'registered' ? 'block' : 'none';
+      $("#adminSubPhotos").style.display = sub === 'photos' ? 'block' : 'none';
       $("#adminSubModeration").style.display = sub === 'moderation' ? 'block' : 'none';
       $("#adminSubAchievements").style.display = sub === 'achievements' ? 'block' : 'none';
       $("#adminSubSettings").style.display = sub === 'settings' ? 'block' : 'none';
 
       if (sub === 'queue') loadAdminQueue();
       if (sub === 'registered') loadAdminRegistered();
+      if (sub === 'photos') loadAdminPhotoQueue();
       if (sub === 'moderation') loadAdminModeration();
       if (sub === 'achievements') loadAdminAchievements();
     }
@@ -3185,6 +3236,56 @@
         currentMembers = currentMembers.filter(x => x.id !== id);
       }
       loadAdminQueue();
+    }
+
+    // Every tribute photo -- for a registered "In Loving Memory" profile
+    // or for someone only ever named, never registered -- sits in
+    // memorialPhotosPending until an admin approves or rejects it here.
+    async function loadAdminPhotoQueue() {
+      const container = $("#adminPhotoList");
+      const pending = memorialPhotosPending;
+      if (!pending.length) {
+        container.innerHTML = `<p class="muted">No tribute photos awaiting approval.</p>`;
+        return;
+      }
+      container.innerHTML = pending.map(ph => `
+        <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+          <img src="${ftEsc(ph.photo_url)}" style="width:100%; height:160px; object-fit:cover; border-radius:10px;" onerror="this.src='https://placehold.co/300x160/0f161e/d4af37?text=Photo'">
+          <span class="admin-badge badge-pending">Awaiting Approval</span>
+          <h3 style="margin:0; font-size:18px;">${ftEsc(ph.person_name || (ph.member_id ? "Registered member" : "Unregistered family member"))}</h3>
+          <p class="muted" style="font-size:12px;">${ph.member_id ? "Registered — In Loving Memory" : "Named in the tree, not yet registered"}</p>
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" style="padding:8px 16px; font-size:13px;" onclick="approveMemorialPhoto('${ph.id}')">Approve</button>
+            <button class="btn btn-danger" style="padding:8px 16px; font-size:13px;" onclick="rejectMemorialPhoto('${ph.id}')">Reject</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function approveMemorialPhoto(id) {
+      if (db.isReady()) {
+        await db.update("memorial_photos", "id", id, { status: 'verified' });
+        await loadMemorialPhotos();
+      } else {
+        const ph = memorialPhotosPending.find(x => x.id === id);
+        if (ph) {
+          ph.status = 'verified';
+          memorialPhotosPending = memorialPhotosPending.filter(x => x.id !== id);
+          const key = tributeKeyFor(ph.member_id, ph.person_key);
+          (memorialPhotosByPerson[key] = memorialPhotosByPerson[key] || []).push(ph);
+        }
+      }
+      loadAdminPhotoQueue();
+      renderFamilyTree(currentMembers);
+      renderMemorialWall(currentMembers.filter(mm => mm.status === 'verified' && mm.is_deceased));
+    }
+
+    async function rejectMemorialPhoto(id) {
+      if (db.isReady()) {
+        await db.delete("memorial_photos", "id", id);
+      }
+      memorialPhotosPending = memorialPhotosPending.filter(x => x.id !== id);
+      loadAdminPhotoQueue();
     }
 
     async function loadAdminModeration() {
