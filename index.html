@@ -1,0 +1,2692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Thukalil Legacy</title>
+  
+  <!-- Premium Luxury Fonts: Cinzel & Cormorant Garamond for Headings + Inter for Body -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ============ DYNAMIC LUXURY THEME VARIABLES ============ */
+    :root {
+      --bg: #07090d;
+      --fg: #f6f4ee;
+      --muted: #9aa7b5;
+      --card: #0f161e;
+      --line: rgba(212, 175, 55, 0.25);
+      --accent: #d4af37;  /* Champagne Metallic Gold */
+      --accent2: #f3e5ab; /* Soft Light Gold */
+      --emerald: #0d2c22; /* Rich Deep Emerald Accent */
+      /* RGB triplets so every translucent tint follows the configurator colours */
+      --accent-rgb: 212, 175, 55;
+      --accent2-rgb: 243, 229, 171;
+      --deep-rgb: 13, 44, 34;
+      --leaf-rgb: 47, 122, 90;
+      --bad: #e65151;
+      --radius: 20px;
+      --font-display: 'Cinzel', serif;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+      --bg-image: none;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: var(--bg);
+      background-image: var(--bg-image);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: var(--fg);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: 0.03em; }
+    .font-serif { font-family: var(--font-serif); }
+
+    /* Button Tokens */
+    button, input, textarea, select { font: inherit; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #07090d;
+      border: 0;
+      padding: 13px 30px;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px var(--line);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--accent);
+    }
+    
+    .btn-outline {
+      background: rgba(var(--deep-rgb), 0.4);
+      border: 1px solid var(--accent);
+      color: var(--accent2);
+      box-shadow: none;
+    }
+    
+    .btn-outline:hover {
+      background: rgba(var(--accent-rgb), 0.15);
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #e65151, #991b1b);
+      color: white;
+      box-shadow: 0 4px 15px rgba(230, 81, 81, 0.3);
+    }
+
+    /* Fixed Top Navigation Header */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 16px 5vw;
+      background: rgba(7, 9, 13, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    #logoSlot {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      opacity: 0;
+      white-space: nowrap;
+      transition: opacity 0.5s;
+    }
+
+    #logoSlot img, #introLogo img {
+      height: 100%;
+      max-height: 44px;
+      object-fit: contain;
+    }
+
+    nav {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      align-items: center;
+    }
+
+    nav button {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--muted);
+      padding: 8px 16px;
+      border-radius: 99px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-weight: 500;
+      font-size: 13px;
+      letter-spacing: 0.03em;
+      transition: all 0.3s;
+    }
+
+    nav button:hover { color: var(--fg); }
+
+    nav button.on {
+      background: rgba(var(--accent-rgb), 0.12);
+      border-color: var(--line);
+      color: var(--accent2);
+      font-weight: 600;
+    }
+
+    /* Auth status indicator in nav */
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(var(--deep-rgb), 0.6);
+      border: 1px solid var(--accent);
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      color: var(--accent2);
+    }
+
+    /* Layout & Structural Wrappers */
+    .page { display: none; padding-top: 80px; min-height: 100vh; }
+    .page.on { display: block; }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 8vh 6vw;
+    }
+
+    h2 {
+      font-size: clamp(34px, 5.5vw, 64px);
+      line-height: 1.08;
+      margin-bottom: 20px;
+      color: var(--fg);
+      background: linear-gradient(180deg, #ffffff, var(--accent));
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tag {
+      font-size: 12px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 22px;
+      margin-top: 36px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+      position: relative;
+      backdrop-filter: blur(12px);
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.15);
+      transform: translateY(-4px);
+    }
+
+    .card h3 {
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: var(--accent2);
+    }
+
+    .card p, .muted { color: var(--muted); font-size: 15px; }
+
+    .big {
+      font-size: clamp(38px, 5vw, 68px);
+      font-weight: 700;
+      font-family: var(--font-serif);
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    /* Intro Screen Animation Overlay */
+    #intro {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: var(--bg);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    #introCanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+
+    #introLogo {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 9vw, 120px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: 0.12em;
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      text-align: center;
+      padding: 0 5vw;
+      background: linear-gradient(180deg, #ffffff 0%, var(--accent2) 35%, var(--accent) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 22px var(--line)) drop-shadow(0 0 60px var(--line));
+    }
+    #introLogo img { height: auto; max-height: min(30vh, 200px); max-width: 80vw; -webkit-text-fill-color: initial; }
+
+    #introSkip {
+      position: absolute; z-index: 3; right: 22px; bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+      background: rgba(7, 9, 13, 0.4); border: 1px solid var(--line); color: var(--muted);
+      padding: 8px 18px; border-radius: 99px; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+    }
+    #introSkip:hover { color: var(--accent2); border-color: var(--accent); }
+    #intro:not(.go)::after {
+      content: ''; position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px;
+      border-radius: 50%; background: var(--accent); animation: introPulse 1s ease-in-out infinite;
+    }
+    @keyframes introPulse { 0%, 100% { transform: scale(.6); opacity: .4; } 50% { transform: scale(1.4); opacity: 1; } }
+
+    /* Scroll-Driven Animated Hero Section */
+    .sv { position: relative; height: 350vh; }
+    .sv .stage {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+    }
+    .sv canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .sv .shade {
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at center, rgba(0,0,0,0.1) 0%, rgba(7,9,13,0.88) 80%);
+    }
+    .sv .cap {
+      position: absolute;
+      left: 8vw; right: 8vw; bottom: 18vh;
+      font-family: var(--font-serif);
+      font-size: clamp(32px, 6vw, 76px);
+      font-weight: 600;
+      line-height: 1.1;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      max-width: 20ch;
+      color: #ffffff;
+      text-shadow: 0 4px 30px rgba(0,0,0,0.9);
+    }
+    .sv .cap.on { opacity: 1; transform: none; }
+    .sv .hint {
+      position: absolute; left: 50%; bottom: 5vh;
+      transform: translateX(-50%);
+      font-size: 11px; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--accent);
+    }
+    .sv .bar {
+      position: absolute; left: 0; bottom: 0;
+      height: 3px; width: 0;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    /* Family Members Lineage Layout */
+    .member-card {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .member-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 30px rgba(var(--accent-rgb), 0.2);
+    }
+
+    .member-img-wrap {
+      width: 100%;
+      height: 250px;
+      background: #141d27;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .member-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+
+    .member-card:hover .member-img-wrap img { transform: scale(1.06); }
+
+    .member-info { padding: 24px; }
+    .member-name {
+      font-size: 24px;
+      color: var(--accent2);
+      font-family: var(--font-serif);
+      font-weight: 700;
+    }
+
+    .member-parents {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 10px 0 14px;
+      border-top: 1px dashed var(--line);
+      border-bottom: 1px dashed var(--line);
+      padding: 10px 0;
+    }
+
+    /* Achievements Grid Cards */
+    .achieve-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .achieve-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 30px rgba(var(--accent-rgb), 0.2);
+    }
+
+    .achieve-img-wrap {
+      width: 100%;
+      height: 200px;
+      background: #141d27;
+      overflow: hidden;
+    }
+
+    .achieve-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    .achieve-body { padding: 20px; }
+
+    /* Forms & Controls */
+    form { display: grid; gap: 16px; max-width: 580px; margin-top: 24px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label {
+      font-size: 12px;
+      color: var(--accent2);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    input, textarea, select {
+      background: rgba(15, 22, 30, 0.95);
+      color: var(--fg);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 15px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.25);
+    }
+
+    .file-preview {
+      margin-top: 8px;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      display: none;
+    }
+
+    .msg { color: var(--accent); min-height: 1.5em; font-size: 14px; font-weight: 600; }
+
+    /* Guestbook Tributes */
+    .tribute-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+
+    .tribute-author { font-weight: 700; color: var(--accent2); font-size: 17px; font-family: var(--font-serif); }
+    .tribute-date { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+
+    /* Floating Guestbook Trigger Button */
+    #gbFloatBtn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 40;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      display: none;
+    }
+
+    /* Modal Popups */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px);
+      display: none; place-items: center; padding: 20px;
+    }
+    .modal-overlay.open { display: grid; }
+    .modal-body {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      max-width: 800px; width: 100%;
+      max-height: 85vh; overflow-y: auto;
+      padding: 30px; position: relative;
+    }
+    pre code {
+      display: block;
+      background: #05070a;
+      color: #62d4a0;
+      padding: 16px;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    /* Badges & Status */
+    .admin-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+    .badge-verified { background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid #22c55e; }
+
+    /* Scroll Reveals */
+    .rv { opacity: 0; transform: translateY(28px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .rv.in { opacity: 1; transform: none; }
+
+    footer {
+      padding: 40px 6vw 60px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--line);
+      text-align: center;
+      position: relative;
+    }
+
+    .admin-lock-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      margin-left: 8px;
+      transition: color 0.3s;
+      vertical-align: middle;
+    }
+    .admin-lock-btn:hover { color: var(--accent); }
+
+    /* ============ LIVING FAMILY TREE ============ */
+    .tree-toolbar { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:18px; }
+    .tree-toolbar input { flex:1; min-width:220px; }
+    .seg { display:inline-flex; border:1px solid var(--line); border-radius:99px; overflow:hidden; }
+    .seg button { background:none; border:0; color:var(--muted); padding:10px 18px; cursor:pointer; font-size:13px; font-weight:600; letter-spacing:.03em; }
+    .seg button.on { background:rgba(var(--accent-rgb),.16); color:var(--accent2); }
+    .zoomctl { display:inline-flex; gap:6px; }
+    .zoomctl button { width:38px; height:38px; border-radius:50%; border:1px solid var(--line); background:rgba(var(--deep-rgb),.5); color:var(--accent2); font-size:18px; cursor:pointer; }
+    .zoomctl button:hover { border-color:var(--accent); }
+
+    .tree-stage { position:relative; border:1px solid var(--line); border-radius:28px; overflow:hidden;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(var(--accent-rgb),.14), transparent 55%),
+        radial-gradient(ellipse at 50% 100%, rgba(var(--deep-rgb),.9), transparent 60%),
+        rgba(8,12,16,.85); }
+    .tree-scroll { overflow:auto; max-height:78vh; min-height:420px; cursor:grab; padding:10px 0 50px; -webkit-overflow-scrolling:touch; }
+    .tree-scroll.drag { cursor:grabbing; user-select:none; }
+    .tree-canvas { width:max-content; min-width:100%; padding:0 40px; display:flex; flex-direction:column; align-items:center; gap:64px; position:relative; z-index:1; }
+    .tree-crest { display:flex; justify-content:center; padding-top:18px; position:relative; z-index:1; }
+    .tree-crest svg { width:150px; height:auto; filter:drop-shadow(0 0 14px rgba(var(--accent-rgb),.35)); }
+    .tree-legend { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; padding:0 16px 14px; font-size:12px; color:var(--muted); position:relative; z-index:1; }
+    .tree-legend i { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:-1px; }
+
+    .leaf-bg { position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+    .leaf-bg span { position:absolute; width:14px; height:14px; border-radius:0 100% 0 100%; background:var(--accent); opacity:.12; animation:leafFloat 14s linear infinite; }
+    @keyframes leafFloat { 0%{transform:translateY(-20px) rotate(0)} 100%{transform:translateY(110vh) rotate(360deg)} }
+
+    .fhouse { display:flex; flex-direction:column; align-items:center; }
+    .fhouse-title { font-family:var(--font-display); font-size:13px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; text-align:center; }
+    .fhouse-title small { display:block; font-family:var(--font-body); letter-spacing:.06em; text-transform:none; color:var(--muted); font-size:12px; margin-top:2px; }
+    .fhouse-trunk { width:2px; height:26px; background:linear-gradient(var(--accent),rgba(var(--accent-rgb),.3)); margin-bottom:0; }
+
+    .ftree ul { display:flex; justify-content:center; padding-top:34px; position:relative; list-style:none; margin:0; }
+    .ftree li { list-style:none; position:relative; padding:34px 14px 0; display:flex; flex-direction:column; align-items:center; }
+    .ftree li::before, .ftree li::after { content:''; position:absolute; top:0; right:50%; width:50%; height:34px; border-top:2px solid rgba(var(--accent-rgb),.55); }
+    .ftree li::after { right:auto; left:50%; border-left:2px solid rgba(var(--accent-rgb),.55); }
+    .ftree li:only-child::before, .ftree li:only-child::after { display:none; }
+    .ftree li:only-child { padding-top:0; }
+    .ftree li:first-child::before, .ftree li:last-child::after { border:0 none; }
+    .ftree li:last-child::before { border-right:2px solid rgba(var(--accent-rgb),.55); border-radius:0 18px 0 0; }
+    .ftree li:first-child::after { border-radius:18px 0 0 0; }
+    .ftree ul ul::before { content:''; position:absolute; top:0; left:50%; border-left:2px solid rgba(var(--accent-rgb),.55); height:34px; }
+    .ftree > ul { padding-top:0; }
+    .ftree > ul > li { padding-top:0; }
+    .ftree > ul > li::before, .ftree > ul > li::after { display:none; }
+    /* a little leaf where each branch meets its parent */
+    .ftree ul ul > li > .couple::before { content:''; position:absolute; top:-8px; left:50%; width:12px; height:12px; margin-left:-6px; border-radius:0 100% 0 100%; background:linear-gradient(135deg,rgb(var(--leaf-rgb)),var(--accent)); transform:rotate(-10deg); box-shadow:0 0 8px rgba(var(--accent-rgb),.5); }
+
+    .couple { display:flex; align-items:center; gap:2px; padding:12px 14px; border-radius:30px; position:relative;
+      background:linear-gradient(180deg, rgba(var(--deep-rgb),.65), rgba(var(--deep-rgb),.25)); border:1px solid var(--line); }
+    .couple .knot { width:26px; height:26px; flex:none; }
+
+    .fnode { background:none; border:0; color:inherit; cursor:pointer; width:96px; display:flex; flex-direction:column; align-items:center; gap:6px; padding:2px; transition:transform .25s, opacity .25s, filter .25s; }
+    .fnode:hover { transform:translateY(-3px) scale(1.05); }
+    .fring { position:relative; width:70px; height:70px; border-radius:50%; padding:3px; display:block;
+      background:conic-gradient(from 200deg, var(--accent), var(--accent2), rgb(var(--leaf-rgb)), var(--accent)); box-shadow:0 0 16px rgba(var(--accent-rgb),.25); }
+    .fring img, .fring .finit { position:absolute; inset:3px; width:calc(100% - 6px); height:calc(100% - 6px); border-radius:50%; object-fit:cover; background:#0f161e; }
+    .finit { display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:24px; color:var(--accent2); }
+    .fname { font-family:var(--font-serif); font-weight:700; font-size:15px; line-height:1.15; color:var(--fg); word-break:break-word; }
+    .fsub { font-size:10.5px; color:var(--muted); line-height:1.2; }
+    .fbadge { position:absolute; right:-4px; bottom:-2px; min-width:22px; height:22px; border-radius:99px; background:rgb(var(--deep-rgb)); border:1px solid var(--accent); color:var(--accent2); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; padding:0 5px; z-index:2; }
+    .fnode.ghost .fring { background:none; border:2px dashed rgba(var(--accent-rgb),.45); box-shadow:none; }
+    .fnode.ghost .fring .finit { background:transparent; color:var(--muted); }
+    .fnode.ghost .fname { color:var(--muted); font-weight:600; }
+    .fnode.hit .fring { box-shadow:0 0 0 4px rgba(var(--accent2-rgb),.35), 0 0 26px var(--accent); }
+    .fnode.dim { opacity:.25; filter:grayscale(.7); }
+
+    .kin-modal { position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.7); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; padding:20px; }
+    .kin-modal.open { display:flex; }
+    .kin-box { background:var(--card); border:1px solid var(--accent); border-radius:24px; max-width:460px; width:100%; max-height:88vh; overflow:auto; padding:28px; position:relative; text-align:center; }
+    .kin-close { position:absolute; top:12px; right:16px; background:none; border:0; color:var(--muted); font-size:26px; cursor:pointer; }
+    .kin-photo { width:110px; height:110px; border-radius:50%; object-fit:cover; border:3px solid var(--accent); margin:0 auto 12px; display:block; background:#0f161e; }
+    .kin-box h3 { font-size:24px; color:var(--accent2); margin-bottom:4px; }
+    .kin-rel { text-align:left; margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
+    .kin-rel b { display:block; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
+    .kin-link { background:rgba(var(--accent-rgb),.1); border:1px solid var(--line); color:var(--accent2); border-radius:99px; padding:4px 12px; margin:0 6px 6px 0; font-size:13px; cursor:pointer; }
+    .kin-link:hover { border-color:var(--accent); }
+    .kin-plain { color:var(--muted); font-size:13px; margin:0 6px 6px 0; display:inline-block; }
+    .kin-hint { font-size:13px; color:var(--accent2); background:rgba(var(--deep-rgb),.55); border:1px solid var(--line); border-radius:12px; padding:10px 14px; display:none; }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== ANIMATED INTRO SCREEN ==================== -->
+  <div id="intro">
+    <canvas id="introCanvas"></canvas>
+    <div id="introLogo">THUKALIL LEGACY</div>
+    <button id="introSkip" type="button">Skip ›</button>
+  </div>
+
+  <!-- ==================== NAVIGATION HEADER ==================== -->
+  <header>
+    <div id="logoSlot">THUKALIL</div>
+    <nav id="nav"></nav>
+  </header>
+
+  <!-- Floating Action Button for Guestbook -->
+  <button id="gbFloatBtn" class="btn" onclick="openGuestbookModal()">✍️ Leave a Tribute</button>
+
+  <!-- ==================== PAGE CONTAINERS ==================== -->
+  <div data-software="website" data-brand="THUKALIL LEGACY" data-accent="#d4af37" data-accent2="#f3e5ab">
+    
+    <!-- PAGE 1: HERITAGE (HOME) -->
+    <section class="page" id="web-home" data-title="Heritage">
+      <div class="sv">
+        <div class="stage">
+          <canvas id="heroCanvas"></canvas>
+          <div class="shade"></div>
+          <div class="cap" data-from="0.04" data-to="0.32">Roots that run deep through generations.</div>
+          <div class="cap" data-from="0.35" data-to="0.65">A heritage of integrity, strength, and family honor.</div>
+          <div class="cap" data-from="0.68" data-to="0.98">Welcome home to the Thukalil Legacy.</div>
+          <div class="hint">Scroll to explore ↓</div>
+          <div class="bar"></div>
+        </div>
+      </div>
+
+      <div class="wrap">
+        <span class="tag">Our Dynasty</span>
+        <h2 id="heroTitleDisplay">The Story of Thukalil</h2>
+        <p class="muted" style="max-width: 720px; font-size: 17px;" id="heroSubtitleDisplay">
+          For generations, the Thukalil family has stood as a pillar of unity, ambition, and honor. From our cherished ancestral roots to our global family presence, this digital portal preserves our lineage and connects our extended family across the world.
+        </p>
+
+        <div class="grid">
+          <div class="card">
+            <div class="big" id="cntMembers">0</div>
+            <p style="margin-top:10px">Verified family lineage members</p>
+          </div>
+          <div class="card">
+            <div class="big">100+</div>
+            <p style="margin-top:10px">Years of preserved lineage & history</p>
+          </div>
+          <div class="card">
+            <div class="big" id="cntTributes">0</div>
+            <p style="margin-top:10px">Tributes recorded in our family guestbook</p>
+          </div>
+        </div>
+
+        <!-- FEATURED ACHIEVEMENTS SECTION -->
+        <span class="tag" style="margin-top:12vh">Honors & Milestones</span>
+        <h2>Featured Family Achievements</h2>
+        <div class="grid" id="featuredAchievementsGrid">
+          <!-- Dynamically populated from Featured Checkbox in Admin -->
+        </div>
+
+        <!-- FEATURED TRIBUTES SECTION -->
+        <span class="tag" style="margin-top:12vh">Featured Voices</span>
+        <h2>Spotlight Tributes</h2>
+        <div id="featuredTributesGrid">
+          <!-- Dynamically populated from Featured Checkbox in Admin -->
+        </div>
+
+        <span class="tag" style="margin-top:12vh">Family Creed</span>
+        <h2>Honor, Unity, & Preservation</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Pillar of Unity</h3>
+            <p>Bound by blood, compassion, and loyalty to support one another across all generations and locations.</p>
+          </div>
+          <div class="card">
+            <h3>Preserving Memories</h3>
+            <p>Every story, lineage node, and milestone is documented so future generations honor their roots.</p>
+          </div>
+          <div class="card">
+            <h3>Global Network</h3>
+            <p>While our branches spread across continents, our heart remains anchored in the Thukalil legacy.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: FAMILY DIRECTORY (`web-directory`) -->
+    <section class="page" id="web-directory" data-title="Family Tree">
+      <div class="wrap" style="max-width:1400px;">
+        <span class="tag">Lineage & Kinship</span>
+        <h2>Thukalil Family Tree</h2>
+        <p class="muted" style="max-width:680px; margin-bottom:24px;">
+          Everyone who registers under the same father or mother is grouped together automatically &mdash; spelling and capital letters don't matter. Tap anyone to see their relatives.
+        </p>
+
+        <div class="tree-toolbar">
+          <input type="text" id="memberSearch" placeholder="Search member, father, or mother name...">
+          <div class="seg">
+            <button id="vwTree" class="on" onclick="setTreeView('tree')">🌳 Tree</button>
+            <button id="vwCards" onclick="setTreeView('cards')">Cards</button>
+          </div>
+          <div class="zoomctl" id="zoomCtl">
+            <button onclick="treeZoom(-0.1)" aria-label="Zoom out">−</button>
+            <button onclick="treeZoom(0)" aria-label="Reset zoom" style="font-size:13px;">⟲</button>
+            <button onclick="treeZoom(0.1)" aria-label="Zoom in">+</button>
+          </div>
+        </div>
+
+        <div class="tree-stage" id="treeStage">
+          <div class="leaf-bg" id="leafBg"></div>
+          <div class="tree-crest">
+            <svg viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M100 118 V70 M100 90 C80 84 62 72 50 52 M100 80 C120 74 138 62 150 42 M100 70 C96 52 96 36 100 20 M100 100 C70 98 40 90 24 74 M100 98 C130 96 160 88 176 72" style="stroke:var(--accent)" stroke-width="2.4" stroke-linecap="round"/>
+              <g style="fill:rgb(var(--leaf-rgb));stroke:var(--accent)" stroke-width="1">
+                <path d="M50 52c-10-2-14-10-14-16 8 0 16 6 14 16z"/><path d="M150 42c10-2 14-10 14-16-8 0-16 6-14 16z"/>
+                <path d="M100 20c-8-4-10-12-8-18 8 3 12 10 8 18z"/><path d="M100 20c8-4 10-12 8-18-8 3-12 10-8 18z"/>
+                <path d="M24 74c-8-3-12-10-10-16 8 1 13 8 10 16z"/><path d="M176 72c8-3 12-10 10-16-8 1-13 8-10 16z"/>
+              </g>
+            </svg>
+          </div>
+          <div class="tree-scroll" id="treeScroll">
+            <div class="tree-canvas" id="treeCanvas"></div>
+          </div>
+          <div class="tree-legend">
+            <span><i style="background:conic-gradient(var(--accent),var(--accent2),rgb(var(--leaf-rgb)),var(--accent));"></i>Registered member</span>
+            <span><i style="border:2px dashed rgba(var(--accent-rgb),.6);"></i>Named as a parent, not registered yet</span>
+            <span>⚭ Linked pair = parents</span>
+          </div>
+        </div>
+
+        <div class="grid" id="membersGrid" style="display:none;"></div>
+      </div>
+
+      <div class="kin-modal" id="kinModal" onclick="if(event.target===this)closeKin()">
+        <div class="kin-box" id="kinBox"></div>
+      </div>
+    </section>
+
+    <!-- PAGE 3: ACHIEVEMENTS (`web-achievements`) -->
+    <section class="page" id="web-achievements" data-title="Achievements">
+      <div class="wrap">
+        <span class="tag">Excellence & Pride</span>
+        <h2>Family Achievements</h2>
+        <p class="muted" style="max-width:640px; margin-bottom: 24px;">
+          Celebrating the milestones, honors, professional triumphs, and academic excellence of the Thukalil family.
+        </p>
+
+        <div class="grid" id="achievementsGrid">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 4: TRIBUTES & GUESTBOOK (`web-guestbook`) -->
+    <section class="page" id="web-guestbook" data-title="Guestbook">
+      <div class="wrap">
+        <span class="tag">Shared Memories</span>
+        <h2>Family Guestbook & Tributes</h2>
+        <p class="muted" style="max-width:640px; margin-bottom: 24px;">
+          Read tributes, blessings, and memories shared by our extended global family.
+        </p>
+
+        <div id="guestbookList">
+          <!-- Dynamically Populated -->
+        </div>
+
+        <!-- GUESTBOOK FORM AT THE BOTTOM OF THE PAGE -->
+        <div style="margin-top: 50px; border-top: 1px dashed var(--line); padding-top: 40px;">
+          <h3 style="font-size: 24px; margin-bottom: 12px; color: var(--accent2);">Leave a Blessing or Tribute</h3>
+          <form id="guestbookForm">
+            <div class="form-group">
+              <label>Your Name *</label>
+              <input name="author_name" placeholder="Your Name or Relation" required>
+            </div>
+            <div class="form-group">
+              <label>Your Message / Tribute *</label>
+              <textarea name="message" rows="4" placeholder="Write your tribute or family memory..." required></textarea>
+            </div>
+            <button class="btn" type="submit">Post Tribute</button>
+            <div class="msg" id="gbMsg"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 5: CONTACT (`web-contact`) -->
+    <section class="page" id="web-contact" data-title="Contact">
+      <div class="wrap">
+        <span class="tag">Get in Touch</span>
+        <h2>Contact the Legacy Council</h2>
+        <p class="muted" style="max-width:640px; margin-bottom: 24px;">
+          Have questions regarding family archives, upcoming reunions, or directory listings? Send us a message directly.
+        </p>
+
+        <form action="https://formspree.io/f/xblddqwe" method="POST" id="contactForm">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" name="name" placeholder="Your Full Name" required>
+          </div>
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" name="email" placeholder="name@example.com" required>
+          </div>
+          <div class="form-group">
+            <label>Subject</label>
+            <input type="text" name="subject" placeholder="Inquiry regarding Thukalil Legacy">
+          </div>
+          <div class="form-group">
+            <label>Message *</label>
+            <textarea name="message" rows="5" placeholder="Write your message here..." required></textarea>
+          </div>
+          <button class="btn" type="submit">Send Message via Formspree</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- PAGE 6: MY INFO (MEMBER DASHBOARD) (`web-myinfo`) -->
+    <section class="page" id="web-myinfo" data-title="My Info">
+      <div class="wrap">
+        <span class="tag">Member Portal</span>
+        <h2 id="myInfoTitle">Member Dashboard</h2>
+        <p class="muted" style="max-width:640px; margin-bottom: 24px;">
+          Manage your personal profile and upload your proudest achievements to the family registry.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px;">
+          <div>
+            <h3 style="font-size: 22px; color: var(--accent2); margin-bottom: 16px;">Update Profile Details</h3>
+            <form id="myInfoForm">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input name="name" id="myInfoName" required>
+              </div>
+              <div class="form-group">
+                <label>Profile Photo (Select File from PC)</label>
+                <input type="file" id="myInfoPhotoFile" accept="image/*" style="padding: 10px;">
+                <input type="hidden" name="photo_url" id="myInfoPhoto" required>
+                <img id="myInfoPhotoPrev" class="file-preview" alt="Profile Preview">
+              </div>
+              <div class="form-group">
+                <label>Family Branch / Location</label>
+                <input name="branch" id="myInfoBranch">
+              </div>
+              <div class="form-group">
+                <label>Bio / Personal Summary</label>
+                <textarea name="bio" id="myInfoBio" rows="4"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Social Media (optional)</label>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                  <label>Instagram</label>
+                  <input id="myInfoSocialInstagram" placeholder="https://instagram.com/username">
+                </div>
+                <div class="form-group">
+                  <label>Facebook</label>
+                  <input id="myInfoSocialFacebook" placeholder="https://facebook.com/username">
+                </div>
+                <div class="form-group">
+                  <label>LinkedIn</label>
+                  <input id="myInfoSocialLinkedin" placeholder="https://linkedin.com/in/username">
+                </div>
+                <div class="form-group">
+                  <label>X / Twitter</label>
+                  <input id="myInfoSocialX" placeholder="https://x.com/username">
+                </div>
+                <div class="form-group">
+                  <label>YouTube</label>
+                  <input id="myInfoSocialYoutube" placeholder="https://youtube.com/@channel">
+                </div>
+                <div class="form-group">
+                  <label>Website</label>
+                  <input id="myInfoSocialWebsite" placeholder="https://yourwebsite.com">
+                </div>
+              </div>
+
+              <button class="btn" type="submit">Save Profile Updates</button>
+              <div class="msg" id="myInfoMsg"></div>
+            </form>
+          </div>
+
+          <div>
+            <h3 style="font-size: 22px; color: var(--accent2); margin-bottom: 16px;">Submit an Achievement</h3>
+            <form id="addAchieveForm">
+              <div class="form-group">
+                <label>Achievement Title *</label>
+                <input name="title" placeholder="e.g. Published Medical Research / Graduation" required>
+              </div>
+              <div class="form-group">
+                <label>Achievement Photo (Select File from PC) *</label>
+                <input type="file" id="achieveFile" accept="image/*" style="padding: 10px;" required>
+                <input type="hidden" name="image_url" id="achieveImgUrl">
+                <img id="achieveImgPrev" class="file-preview" alt="Achievement Preview">
+              </div>
+              <div class="form-group">
+                <label>Description *</label>
+                <textarea name="description" rows="4" placeholder="Describe your achievement..." required></textarea>
+              </div>
+              <button class="btn" type="submit">Post Achievement</button>
+              <div class="msg" id="achieveMsg"></div>
+            </form>
+          </div>
+        </div>
+
+        <div style="margin-top: 40px;">
+          <button class="btn btn-danger" onclick="logoutUser()">Log Out of Member Portal</button>
+        </div>
+
+        <!-- DANGER ZONE: DELETE ACCOUNT -->
+        <div style="margin-top: 50px; padding-top: 30px; border-top: 1px dashed var(--line);">
+          <h3 style="font-size: 20px; color: #e65151; margin-bottom: 10px;">Danger Zone</h3>
+          <p class="muted" style="margin-bottom: 14px; max-width: 540px;">
+            Deleting your account permanently removes your profile, photo, and login from the family registry. This cannot be undone. Any children or relatives who named you as a parent will remain in the tree as unregistered relatives.
+          </p>
+          <div class="form-group" style="max-width:420px;">
+            <label>Type your full name to confirm deletion</label>
+            <input type="text" id="deleteConfirmName" placeholder="Type your name exactly as registered">
+          </div>
+          <button class="btn btn-danger" onclick="deleteMyAccount()">Delete My Account</button>
+          <div class="msg" id="deleteAcctMsg"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 7: JOIN THE LEGACY & LOGIN (`web-register`) -->
+    <section class="page" id="web-register" data-title="Join / Login">
+      <div class="wrap">
+        <span class="tag">Member Access</span>
+        <h2>Register or Login</h2>
+        <p class="muted" style="max-width:640px; margin-bottom:24px;">
+          Register your lineage to join the family tree, or log in to access your member portal.
+        </p>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid var(--line); padding-bottom: 12px;">
+          <button class="btn" id="btnTabReg" onclick="switchAuthTab('reg')">Register Lineage</button>
+          <button class="btn btn-outline" id="btnTabLog" onclick="switchAuthTab('log')">Member Login</button>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="authRegBox">
+          <form id="regForm">
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input name="name" placeholder="e.g. Alexander Thukalil" required>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label>Father's Name *</label>
+                <input name="father_name" id="regFather" list="kinNames" autocomplete="off" placeholder="Father's full name" required>
+              </div>
+              <div class="form-group">
+                <label>Mother's Name *</label>
+                <input name="mother_name" id="regMother" list="kinNames" autocomplete="off" placeholder="Mother's full name" required>
+              </div>
+            </div>
+
+            <datalist id="kinNames"></datalist>
+            <div class="kin-hint" id="kinHint"></div>
+
+            <div class="form-group">
+              <label>Create Account Password *</label>
+              <input type="password" name="password" placeholder="Create a secure password" required>
+            </div>
+
+            <div class="form-group">
+              <label>Photo (Select File from PC) *</label>
+              <input type="file" id="regPhotoFile" accept="image/*" style="padding: 10px;" required>
+              <input type="hidden" name="photo_url" id="regPhotoUrl">
+              <img id="regPhotoPrev" class="file-preview" alt="Registration Photo Preview">
+            </div>
+
+            <div class="form-group">
+              <label>Family Branch / Location</label>
+              <input name="branch" placeholder="e.g. Kerala, USA, Dubai, UK...">
+            </div>
+
+            <div class="form-group">
+              <label>About You / Bio / Description</label>
+              <textarea name="bio" rows="4" placeholder="Share a short bio, profession, or family memory..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Social Media (optional)</label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label>Instagram</label>
+                <input name="social_instagram" placeholder="https://instagram.com/username">
+              </div>
+              <div class="form-group">
+                <label>Facebook</label>
+                <input name="social_facebook" placeholder="https://facebook.com/username">
+              </div>
+              <div class="form-group">
+                <label>LinkedIn</label>
+                <input name="social_linkedin" placeholder="https://linkedin.com/in/username">
+              </div>
+              <div class="form-group">
+                <label>X / Twitter</label>
+                <input name="social_x" placeholder="https://x.com/username">
+              </div>
+              <div class="form-group">
+                <label>YouTube</label>
+                <input name="social_youtube" placeholder="https://youtube.com/@channel">
+              </div>
+              <div class="form-group">
+                <label>Website</label>
+                <input name="social_website" placeholder="https://yourwebsite.com">
+              </div>
+            </div>
+
+            <button class="btn" type="submit">Submit for Lineage Verification</button>
+            <div class="msg" id="regMsg"></div>
+          </form>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="authLogBox" style="display: none;">
+          <form id="loginForm">
+            <div class="form-group">
+              <label>Your Full Name (As Registered) *</label>
+              <input name="login_name" id="loginName" placeholder="e.g. Abraham Thukalil" required>
+            </div>
+            <div class="form-group">
+              <label>Password *</label>
+              <input type="password" name="login_pass" id="loginPass" placeholder="Enter your password" required>
+            </div>
+            <button class="btn" type="submit">Log In to Portal</button>
+            <div class="msg" id="loginMsg"></div>
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 8: ADMIN PORTAL (`web-admin`) -->
+    <section class="page" id="web-admin" data-title="Admin Panel">
+      <div class="wrap">
+        <span class="tag">Control Center</span>
+        <h2>Thukalil Admin Portal</h2>
+        
+        <div id="adminAuthSection" style="max-width: 420px; margin-top: 30px;">
+          <p class="muted" style="margin-bottom: 16px;">Enter Security PIN to unlock verification and site controls.</p>
+          <div class="form-group">
+            <input type="password" id="adminPinInput" placeholder="Enter Admin PIN (Default: 7777)">
+          </div>
+          <div style="display:flex; gap:10px; margin-top:14px;">
+            <button class="btn" onclick="unlockAdmin()">Unlock Panel</button>
+          </div>
+          <div class="msg" id="adminAuthMsg"></div>
+        </div>
+
+        <div id="adminContentSection" style="display: none; margin-top: 30px;">
+          
+          <!-- ADMIN CONTROLS ROW -->
+          <div style="display: flex; gap: 10px; flex-wrap:wrap; margin-bottom: 30px; border-bottom: 1px solid var(--line); padding-bottom: 14px;">
+            <button class="btn" onclick="showAdminSub('queue')">Pending Verifications</button>
+            <button class="btn btn-outline" onclick="showAdminSub('registered')">Registered People</button>
+            <button class="btn btn-outline" onclick="showAdminSub('moderation')">Manage Tributes</button>
+            <button class="btn btn-outline" onclick="showAdminSub('achievements')">Manage Achievements</button>
+            <button class="btn btn-outline" onclick="showAdminSub('settings')">Site Configurator</button>
+          </div>
+
+          <!-- SUBTAB 1: VERIFICATION QUEUE -->
+          <div id="adminSubQueue">
+            <h3 style="font-size: 24px; margin-bottom: 14px;">Pending Member Approvals</h3>
+            <p class="muted" style="margin-bottom: 20px;">Verify applicant details before approving them to the Family Tree.</p>
+            
+            <div id="pendingList" class="grid">
+              <!-- Dynamically Populated -->
+            </div>
+          </div>
+
+          <!-- SUBTAB 1b: REGISTERED PEOPLE -->
+          <div id="adminSubRegistered" style="display: none;">
+            <h3 style="font-size: 24px; margin-bottom: 14px;">Registered Family Members</h3>
+            <p class="muted" style="margin-bottom: 20px;">All verified members currently visible in the Family Tree and Directory. Remove anyone who should no longer appear.</p>
+            <div class="tree-toolbar">
+              <input type="text" id="registeredSearch" placeholder="Search registered members...">
+            </div>
+            <div id="adminRegisteredList" class="grid"></div>
+          </div>
+
+          <!-- SUBTAB 2: GUESTBOOK MODERATION & HOMEPAGE FEATURE CHECKBOXES -->
+          <div id="adminSubModeration" style="display: none;">
+            <h3 style="font-size: 24px; margin-bottom: 14px;">Manage & Feature Tributes</h3>
+            <p class="muted" style="margin-bottom: 20px;">Check the box next to a tribute to feature it prominently on the Home Page.</p>
+            <div id="adminGbList">
+              <!-- Dynamically Populated -->
+            </div>
+          </div>
+
+          <!-- SUBTAB 3: ACHIEVEMENTS MODERATION & HOMEPAGE FEATURE CHECKBOXES -->
+          <div id="adminSubAchievements" style="display: none;">
+            <h3 style="font-size: 24px; margin-bottom: 14px;">Manage & Feature Achievements</h3>
+            <p class="muted" style="margin-bottom: 20px;">Check the box to feature an achievement on the Home Page.</p>
+            <div id="adminAchieveList" class="grid">
+              <!-- Dynamically Populated -->
+            </div>
+          </div>
+
+          <!-- SUBTAB 4: SITE CONFIGURATOR -->
+          <div id="adminSubSettings" style="display: none;">
+            <h3 style="font-size: 24px; margin-bottom: 14px;">Live Site Theme & Branding</h3>
+            <p class="muted" style="margin-bottom: 20px;">Customize site colors, titles, logo, and background directly in Supabase config.</p>
+
+            <form id="configForm">
+              <div class="form-group">
+                <label>Brand / Logo Text</label>
+                <input name="logo_text" id="cfgLogoText" placeholder="THUKALIL LEGACY">
+              </div>
+
+              <div class="form-group">
+                <label>Logo Image (Select File from PC)</label>
+                <input type="file" id="cfgLogoFileInput" accept="image/*" style="padding: 10px;">
+                <input type="hidden" name="logo_url" id="cfgLogoUrl">
+                <img id="cfgLogoPrev" class="file-preview" alt="Logo Preview">
+              </div>
+
+              <div class="form-group">
+                <label>Background Image (Select File from PC)</label>
+                <input type="file" id="cfgBgFileInput" accept="image/*" style="padding: 10px;">
+                <input type="hidden" name="bg_image" id="cfgBgImage">
+                <img id="cfgBgPrev" class="file-preview" alt="Background Preview">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                  <label>Primary Metallic Accent</label>
+                  <input name="accent_color" id="cfgAccent" type="color" value="#d4af37">
+                </div>
+                <div class="form-group">
+                  <label>Secondary Soft Accent</label>
+                  <input name="accent2_color" id="cfgAccent2" type="color" value="#f3e5ab">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Hero Heading Title</label>
+                <input name="hero_title" id="cfgHeroTitle" placeholder="The Story of Thukalil">
+              </div>
+
+              <div class="form-group">
+                <label>Hero Description Subtitle</label>
+                <textarea name="hero_subtitle" id="cfgHeroSubtitle" rows="3"></textarea>
+              </div>
+
+              <button class="btn" type="submit">Save Dynamic Theme & Config</button>
+              <div class="msg" id="cfgMsg"></div>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ==================== GUESTBOOK POPUP MODAL ==================== -->
+  <div class="modal-overlay" id="gbModal">
+    <div class="modal-body" style="max-width: 500px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="font-size: 22px; color: var(--accent2);">Leave a Tribute</h3>
+        <button class="btn btn-outline" style="padding: 4px 12px;" onclick="closeGuestbookModal()">✕ Close</button>
+      </div>
+      <form id="guestbookModalForm">
+        <div class="form-group">
+          <label>Your Name *</label>
+          <input name="author_name" placeholder="Your Name or Relation" required>
+        </div>
+        <div class="form-group">
+          <label>Your Message / Tribute *</label>
+          <textarea name="message" rows="4" placeholder="Write your tribute or family memory..." required></textarea>
+        </div>
+        <button class="btn" type="submit">Post Tribute</button>
+        <div class="msg" id="gbModalMsg"></div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    © <span id="footBrand">Thukalil Family Legacy</span>. Preserving history, kinship, and family honor.
+    <button class="admin-lock-btn" onclick="showPage('web-admin')" title="Admin Portal Access">🔒</button>
+  </footer>
+
+  <!-- ==================== APPLICATION SCRIPT ==================== -->
+  <script>
+    /* 
+    ========================================================================
+    1. SUPABASE CREDENTIALS & REST HELPER
+    ========================================================================
+    Fill in your Supabase project URL & Anon key below.
+    If left unconfigured, the website runs using interactive Local Fallback mode!
+    */
+    const SUPABASE_URL = "https://uuajzkqdohdyzunwylhc.supabase.co";
+    const SUPABASE_KEY = "sb_publishable__Iv-PrgQbgTkkA95RZ6Isw_m7eJNLZe";
+
+    const db = {
+      isReady: () => SUPABASE_URL.includes("https://") && !SUPABASE_URL.includes("YOUR_SUPABASE"),
+      
+      async select(table, query = "") {
+        if (!this.isReady()) return null;
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+            headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+          });
+          return await res.json();
+        } catch(e) { console.error(e); return null; }
+      },
+
+      async insert(table, data) {
+        if (!this.isReady()) return false;
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+            method: 'POST',
+            headers: {
+              apikey: SUPABASE_KEY,
+              Authorization: `Bearer ${SUPABASE_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify(data)
+          });
+          return res.ok;
+        } catch(e) { console.error(e); return false; }
+      },
+
+      async update(table, matchCol, matchVal, data) {
+        if (!this.isReady()) return false;
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${matchCol}=eq.${matchVal}`, {
+            method: 'PATCH',
+            headers: {
+              apikey: SUPABASE_KEY,
+              Authorization: `Bearer ${SUPABASE_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          });
+          return res.ok;
+        } catch(e) { console.error(e); return false; }
+      },
+
+      async delete(table, matchCol, matchVal) {
+        if (!this.isReady()) return false;
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${matchCol}=eq.${matchVal}`, {
+            method: 'DELETE',
+            headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+          });
+          return res.ok;
+        } catch(e) { console.error(e); return false; }
+      }
+    };
+
+    const $ = s => document.querySelector(s);
+    const $$ = s => [...document.querySelectorAll(s)];
+    const clamp = (v, min = 0, max = 1) => Math.min(max, Math.max(min, v));
+
+    // #introLogo lives inside the intro overlay, which runIntro() permanently
+    // removes from the DOM once the animation finishes. Any later code that
+    // still writes to $("#introLogo") (e.g. the Site Configurator, loaded
+    // theme config) must go through these so it doesn't crash once the intro
+    // is gone -- that was the actual cause of the configurator silently dying.
+    function setBrandText(text) {
+      const slot = $("#logoSlot"), intro = $("#introLogo");
+      if (slot) slot.textContent = text;
+      if (intro) intro.textContent = text;
+    }
+    function setBrandImage(url) {
+      const html = `<img src="${url}" alt="Logo">`;
+      const slot = $("#logoSlot"), intro = $("#introLogo");
+      if (slot) slot.innerHTML = html;
+      if (intro) intro.innerHTML = html;
+    }
+
+    /* State Management */
+    let loggedInUser = null;
+
+    /* Base64 File Converter Utility */
+    function attachFilePicker(fileInputId, hiddenInputId, previewImgId) {
+      const fileEl = $(fileInputId);
+      const hiddenEl = $(hiddenInputId);
+      const prevEl = previewImgId ? $(previewImgId) : null;
+
+      if (!fileEl) return;
+
+      fileEl.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            const result = evt.target.result;
+            if (hiddenEl) hiddenEl.value = result;
+            if (prevEl) {
+              prevEl.src = result;
+              prevEl.style.display = "block";
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    // Attach File Pickers across all image sections
+    attachFilePicker("#cfgBgFileInput", "#cfgBgImage", "#cfgBgPrev");
+    attachFilePicker("#cfgLogoFileInput", "#cfgLogoUrl", "#cfgLogoPrev");
+    attachFilePicker("#regPhotoFile", "#regPhotoUrl", "#regPhotoPrev");
+    attachFilePicker("#myInfoPhotoFile", "#myInfoPhoto", "#myInfoPhotoPrev");
+    attachFilePicker("#achieveFile", "#achieveImgUrl", "#achieveImgPrev");
+
+    /* =====================================================================
+       THEME ENGINE: one place that applies the configurator colours
+       ===================================================================== */
+    function hexToRgb(h) {
+      const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec((h || "").trim());
+      if (!m) return null;
+      let x = m[1]; if (x.length === 3) x = x.split("").map(c => c + c).join("");
+      const n = parseInt(x, 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+    function applyTheme(accent, accent2) {
+      const root = document.documentElement.style;
+      const a = hexToRgb(accent), b = hexToRgb(accent2);
+      if (a) {
+        root.setProperty("--accent", accent);
+        root.setProperty("--accent-rgb", a.join(", "));
+        root.setProperty("--line", `rgba(${a.join(", ")}, 0.25)`);
+        const isDefault = a.join() === "212,175,55";
+        const mix = (c, base, k) => c.map((v, i) => Math.round(v * k + base[i] * (1 - k)));
+        const deep = isDefault ? [13, 44, 34] : mix(a, [7, 9, 13], 0.22);
+        const leaf = isDefault ? [47, 122, 90] : mix(a, [10, 30, 25], 0.55);
+        root.setProperty("--deep-rgb", deep.join(", "));
+        root.setProperty("--leaf-rgb", leaf.join(", "));
+        root.setProperty("--emerald", `rgb(${deep.join(", ")})`);
+      }
+      if (b) { root.setProperty("--accent2", accent2); root.setProperty("--accent2-rgb", b.join(", ")); }
+    }
+    function cacheTheme(obj) {
+      try { localStorage.setItem("thukalil_theme", JSON.stringify(obj)); } catch (e) { /* storage may be blocked */ }
+    }
+    // paint the last-used colours instantly (before the database answers)
+    (function () {
+      try {
+        const t = JSON.parse(localStorage.getItem("thukalil_theme") || "null");
+        if (t) {
+          applyTheme(t.accent, t.accent2);
+          if (t.bg_image) document.documentElement.style.setProperty("--bg-image", `url('${t.bg_image}')`);
+        }
+      } catch (e) {}
+    })();
+
+    /* =====================================================================
+       AUTO-LOAD PERSISTENT THEME CONFIG FROM DATABASE
+       ===================================================================== */
+    async function loadSavedThemeConfig() {
+      if (!db.isReady()) return;
+      
+      const config = await db.select("site_config");
+      if (config && Array.isArray(config)) {
+        config.forEach(item => {
+          if (item.key === "accent" && item.value && $("#cfgAccent")) $("#cfgAccent").value = item.value;
+          if (item.key === "accent2" && item.value && $("#cfgAccent2")) $("#cfgAccent2").value = item.value;
+          if (item.key === "bg_image" && item.value) {
+            document.documentElement.style.setProperty("--bg-image", `url('${item.value}')`);
+            if ($("#cfgBgImage")) $("#cfgBgImage").value = item.value;
+          }
+          if (item.key === "logo_text" && item.value) {
+            setBrandText(item.value);
+            if ($("#cfgLogoText")) $("#cfgLogoText").value = item.value;
+          }
+          if (item.key === "logo_url" && item.value) {
+            setBrandImage(item.value);
+            if ($("#cfgLogoUrl")) $("#cfgLogoUrl").value = item.value;
+          }
+          if (item.key === "hero_title" && item.value) {
+            $("#heroTitleDisplay").textContent = item.value;
+            if ($("#cfgHeroTitle")) $("#cfgHeroTitle").value = item.value;
+          }
+          if (item.key === "hero_subtitle" && item.value) {
+            $("#heroSubtitleDisplay").textContent = item.value;
+            if ($("#cfgHeroSubtitle")) $("#cfgHeroSubtitle").value = item.value;
+          }
+        });
+        const get = (k) => (config.find(i => i.key === k) || {}).value;
+        const acc = get("accent"), acc2 = get("accent2");
+        if (acc || acc2) {
+          applyTheme(acc || getComputedStyle(document.documentElement).getPropertyValue("--accent"),
+                     acc2 || getComputedStyle(document.documentElement).getPropertyValue("--accent2"));
+          cacheTheme({ accent: acc, accent2: acc2, bg_image: get("bg_image") });
+        }
+      }
+    }
+
+    // Upsert Configuration Helper to avoid insertion conflict errors
+    let configSaveErrors = [];
+    async function saveConfigKey(key, value) {
+      if (!db.isReady() || !value) return true;
+      // hard timeout so a stalled/blocked request can't hang the Save button forever
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      try {
+        // on_conflict is required by PostgREST for "merge-duplicates" upserts on
+        // some Supabase/PostgREST versions -- without it the request can silently
+        // fail with a duplicate-key error even though "key" is the primary key.
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/site_config?on_conflict=key`, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({ key, value, updated_at: new Date().toISOString() })
+        });
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          console.error("site_config save failed", key, res.status, text);
+          configSaveErrors.push(`${key}: HTTP ${res.status} ${text}`.trim());
+        }
+        return res.ok;
+      } catch (e) {
+        const reason = e && e.name === "AbortError" ? "timed out after 10s (request never got a response)" : (e.message || e);
+        console.error("site_config save threw:", key, e);
+        configSaveErrors.push(`${key}: ${reason}`);
+        return false;
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    /* =====================================================================
+       2. NAVIGATION & TAB ROUTER
+       ===================================================================== */
+    function renderNav() {
+      const nav = $("#nav");
+      nav.innerHTML = "";
+      const pages = $$(".page");
+      
+      pages.forEach(p => {
+        if (p.id === "web-admin") return;
+        if (p.id === "web-myinfo" && !loggedInUser) return;
+        if (p.id === "web-register" && loggedInUser) return;
+
+        const b = document.createElement("button");
+        b.textContent = p.dataset.title;
+        b.dataset.id = p.id;
+        b.onclick = () => showPage(p.id);
+        nav.appendChild(b);
+      });
+
+      if (loggedInUser) {
+        const userPill = document.createElement("div");
+        userPill.className = "user-pill";
+        userPill.innerHTML = `👤 ${loggedInUser.name}`;
+        nav.appendChild(userPill);
+      }
+    }
+
+    function showPage(id) {
+      const pages = $$(".page");
+      if (!pages.some(p => p.id === id)) id = pages[0].id;
+      pages.forEach(p => p.classList.toggle("on", p.id === id));
+      
+      $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.id === id));
+      try { history.replaceState(null, "", "#" + id); } catch (e) { /* sandboxed preview frames block URL changes */ }
+      window.scrollTo(0, 0);
+
+      $("#gbFloatBtn").style.display = id === "web-guestbook" ? "flex" : "none";
+
+      if (id === "web-home") { loadHomeFeatures(); }
+      if (id === "web-directory") loadMembers();
+      if (id === "web-achievements") loadAchievements();
+      if (id === "web-guestbook") loadGuestbook();
+      if (id === "web-myinfo") populateMyInfo();
+    }
+
+    /* =====================================================================
+       3. INTRO SCREEN ANIMATION
+       ===================================================================== */
+    function runIntro(ready) {
+      const intro = $("#intro"), lg = $("#introLogo"), cv = $("#introCanvas"), skipBtn = $("#introSkip");
+      const ctx = cv.getContext("2d");
+      const RM = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document.body.style.overflow = "hidden";
+
+      let W = 0, H = 0, raf = 0, finished = false, timers = [];
+      function size() {
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        W = innerWidth; H = innerHeight;
+        cv.width = W * dpr; cv.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      size();
+      window.addEventListener("resize", size);
+
+      function cleanup() {
+        cancelAnimationFrame(raf);
+        timers.forEach(clearTimeout);
+        window.removeEventListener("resize", size);
+        intro.remove();
+        $("#logoSlot").style.opacity = 1;
+        document.body.style.overflow = "";
+      }
+      function skip() {
+        if (finished) return;
+        finished = true;
+        timers.forEach(clearTimeout);
+        intro.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 350, fill: "forwards" });
+        setTimeout(cleanup, 380);
+      }
+      skipBtn.addEventListener("click", skip);
+
+      // theme colours come straight from the site configurator (CSS variables)
+      const cs = getComputedStyle(document.documentElement);
+      const ACC = cs.getPropertyValue("--accent").trim() || "#d4af37";
+      const ACC2 = cs.getPropertyValue("--accent2").trim() || "#f3e5ab";
+      const BG = cs.getPropertyValue("--bg").trim() || "#07090d";
+      const rgba = (c, a) => {
+        const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(c);
+        if (!m) return c;
+        let h = m[1]; if (h.length === 3) h = h.split("").map(x => x + x).join("");
+        const n = parseInt(h, 16);
+        return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+      };
+
+      // face tiles
+      const TW = W < 640 ? Math.floor(W / 3) : Math.min(200, Math.floor(W / 7));
+      const TH = Math.round(TW * 1.3), GAP = 10;
+      function rr(g, x, y, w, h, r) {
+        g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+        g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+      }
+      function loadImg(src) {
+        return new Promise(res => {
+          const im = new Image(); const t = setTimeout(() => res(null), 1500);
+          im.onload = () => { clearTimeout(t); res(im); };
+          im.onerror = () => { clearTimeout(t); res(null); };
+          im.src = src;
+        });
+      }
+      function makeTile(im, letter) {
+        const c = document.createElement("canvas"); c.width = TW; c.height = TH;
+        const g = c.getContext("2d");
+        g.save(); rr(g, 0, 0, TW, TH, 14); g.clip();
+        if (im) {
+          const k = Math.max(TW / im.width, TH / im.height), w = im.width * k, h = im.height * k;
+          g.filter = "grayscale(1) contrast(1.15) brightness(1.05)"; // ignored on browsers without ctx.filter
+          g.drawImage(im, (TW - w) / 2, (TH - h) * 0.25, w, h);
+          g.filter = "none";
+          g.globalCompositeOperation = "source-atop";
+          g.fillStyle = rgba(ACC, 0.34); g.fillRect(0, 0, TW, TH);
+          g.globalCompositeOperation = "source-over";
+        } else {
+          const gr = g.createLinearGradient(0, 0, TW, TH);
+          gr.addColorStop(0, rgba(ACC, 0.35)); gr.addColorStop(1, rgba(BG, 1));
+          g.fillStyle = gr; g.fillRect(0, 0, TW, TH);
+          g.fillStyle = rgba(ACC2, 0.85); g.font = `900 ${Math.round(TW * 0.5)}px Cinzel, serif`;
+          g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(letter, TW / 2, TH / 2);
+        }
+        const fade = g.createLinearGradient(0, TH * 0.6, 0, TH);
+        fade.addColorStop(0, rgba(BG, 0)); fade.addColorStop(1, rgba(BG, 0.7));
+        g.fillStyle = fade; g.fillRect(0, 0, TW, TH);
+        g.restore();
+        g.strokeStyle = rgba(ACC, 0.75); g.lineWidth = 2; rr(g, 1, 1, TW - 2, TH - 2, 14); g.stroke();
+        return c;
+      }
+
+      const T_LOGO = RM ? 300 : 2700;
+      const T_FLY = T_LOGO + (RM ? 1300 : 2000);
+      const speedAt = (t) => {
+        if (RM) return 90;
+        if (t < T_LOGO) { const k = Math.min(1, Math.max(0, (t - 200) / (T_LOGO - 200))); return 500 + 2900 * k * k; }
+        const k = Math.min(1, (t - T_LOGO) / 900);
+        return 3400 - 2950 * (1 - Math.pow(1 - k, 3));
+      };
+
+      ready.then(async () => {
+        if (finished) return;
+        let members = (typeof currentMembers !== "undefined" ? currentMembers : []).filter(m => m.status === "verified");
+        members = members.sort(() => Math.random() - 0.5).slice(0, 28);
+        const imgs = await Promise.all(members.map(m => m.photo_url ? loadImg(m.photo_url) : Promise.resolve(null)));
+        if (finished) return;
+        let tiles = members.map((m, i) => makeTile(imgs[i], (m.name || "T").trim().charAt(0).toUpperCase()));
+        if (!tiles.length) tiles = "THUKALIL".split("").map(ch => makeTile(null, ch));
+
+        intro.classList.add("go");
+        const t0 = performance.now(); let last = t0, dist = 0, slammed = false;
+
+        timers.push(setTimeout(() => {
+          if (finished) return;
+          slammed = true;
+          lg.animate([
+            { opacity: 0, transform: "scale(2)", filter: "blur(22px)" },
+            { opacity: 1, transform: "scale(0.94)", filter: "blur(0)", offset: 0.7 },
+            { opacity: 1, transform: "scale(1)", filter: "blur(0)" }
+          ], { duration: 800, easing: "cubic-bezier(.2,.9,.2,1)", fill: "both" });
+        }, T_LOGO));
+
+        timers.push(setTimeout(() => {
+          if (finished) return;
+          finished = true;
+          const a = lg.getBoundingClientRect(), s = $("#logoSlot").getBoundingClientRect();
+          const k = Math.max(0.12, s.height / a.height);
+          const dx = s.left + a.width * k / 2 - (a.left + a.width / 2);
+          const dy = s.top + s.height / 2 - (a.top + a.height / 2);
+          lg.animate([{ transform: "none" }, { transform: `translate(${dx}px,${dy}px) scale(${k})` }],
+            { duration: 1000, easing: "cubic-bezier(.7,0,.2,1)", fill: "forwards" });
+          intro.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 900, delay: 200, fill: "forwards" });
+          skipBtn.style.display = "none";
+          timers.push(setTimeout(cleanup, 1150));
+        }, T_FLY));
+
+        function frame(now) {
+          const t = now - t0, dt = Math.min(50, now - last) / 1000; last = now;
+          const v = speedAt(t); dist += v * dt;
+
+          ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+
+          const afterLogo = Math.min(1, Math.max(0, (t - T_LOGO) / 600));
+          const baseA = Math.min(1, t / 300) * (0.5 - 0.28 * afterLogo);
+          const step = TH + GAP, cw = TW + GAP, cols = Math.ceil(W / cw) + 1, x0 = (W - (cols * cw - GAP)) / 2;
+          const rows = Math.ceil(H / step) + 2, period = rows * step;
+
+          for (let c = 0; c < cols; c++) {
+            const dir = c % 2 ? 1 : -1, mul = 0.75 + ((c * 37) % 7) / 14;
+            const pos = (((c * 131) % period + dir * dist * mul) % period + period) % period;
+            const x = x0 + c * cw, smear = Math.min(70, v * mul * 0.013);
+            for (let k = 0; k < rows; k++) {
+              const y = ((k * step + pos) % period) - step;
+              const face = tiles[(c * 5 + k * 3) % tiles.length];
+              if (smear > 6) {
+                for (let g = 3; g >= 1; g--) { ctx.globalAlpha = baseA * 0.16; ctx.drawImage(face, x, y - dir * smear * g * 0.6); }
+              }
+              ctx.globalAlpha = baseA; ctx.drawImage(face, x, y);
+            }
+          }
+          ctx.globalAlpha = 1;
+
+          // vignette (darkens the middle once the name appears)
+          const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.12, W / 2, H / 2, Math.max(W, H) * 0.75);
+          vg.addColorStop(0, rgba(BG, 0.12 + 0.62 * afterLogo)); vg.addColorStop(1, rgba(BG, 0.95));
+          ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+
+          if (!RM) {
+            // film-flicker before the reveal
+            if (t < T_LOGO && Math.random() < 0.1) { ctx.fillStyle = rgba(ACC2, 0.07); ctx.fillRect(0, 0, W, H); }
+            // flash + light sweep on reveal
+            const f = (t - T_LOGO) / 450;
+            if (f >= 0 && f < 1) { ctx.fillStyle = rgba(ACC2, 0.85 * (1 - f)); ctx.fillRect(0, 0, W, H); }
+            const sw = (t - T_LOGO - 150) / 950;
+            if (sw >= 0 && sw <= 1) {
+              const sx = -W * 0.3 + sw * W * 1.6, bw = W * 0.14;
+              ctx.save(); ctx.translate(W / 2, H / 2); ctx.rotate(-0.35); ctx.translate(-W / 2, -H / 2);
+              const gr = ctx.createLinearGradient(sx - bw, 0, sx + bw, 0);
+              gr.addColorStop(0, rgba(ACC2, 0)); gr.addColorStop(0.5, rgba(ACC2, 0.4)); gr.addColorStop(1, rgba(ACC2, 0));
+              ctx.fillStyle = gr; ctx.fillRect(-W, -H, W * 3, H * 3);
+              ctx.restore();
+            }
+          }
+          raf = requestAnimationFrame(frame);
+        }
+        raf = requestAnimationFrame(frame);
+      });
+    }
+
+    /* =====================================================================
+       4. SCROLL-DRIVEN ANIMATED HERO CANVAS
+       ===================================================================== */
+    (function initHeroCanvas() {
+      const sv = $(".sv"), canvas = $("#heroCanvas"), ctx = canvas.getContext("2d");
+      const caps = $$(".sv .cap"), bar = $(".sv .bar"), hint = $(".sv .hint");
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      let target = 0, cur = 0;
+
+      function drawGoldPattern(progress) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cx = canvas.width / 2, cy = canvas.height / 2;
+        
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(progress * Math.PI * 0.4);
+
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#d4af37';
+
+        const rings = 7;
+        for (let i = 1; i <= rings; i++) {
+          const r = i * 50 * (1 + progress * 0.35);
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.strokeStyle = i % 2 === 0 ? accentColor : 'rgba(243, 229, 171, 0.08)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          const nodes = 6;
+          for (let n = 0; n < nodes; n++) {
+            const na = (n / nodes) * Math.PI * 2 + progress * (i % 2 === 0 ? 1 : -1);
+            const nx = Math.cos(na) * r, ny = Math.sin(na) * r;
+            ctx.beginPath();
+            ctx.arc(nx, ny, 3.5, 0, Math.PI * 2);
+            ctx.fillStyle = accentColor;
+            ctx.fill();
+          }
+        }
+        ctx.restore();
+      }
+
+      (function loop() {
+        const r = sv.getBoundingClientRect(), h = r.height - innerHeight;
+        target = h > 0 ? clamp(-r.top / h) : 0;
+        cur += (target - cur) * 0.08;
+
+        drawGoldPattern(cur);
+
+        if (bar) bar.style.width = (cur * 100) + "%";
+        if (hint) hint.style.opacity = cur > 0.05 ? 0 : 1;
+
+        caps.forEach(c => {
+          const from = +c.dataset.from, to = +c.dataset.to;
+          c.classList.toggle("on", cur >= from && cur <= to);
+        });
+
+        requestAnimationFrame(loop);
+      })();
+    })();
+
+    /* =====================================================================
+       5. DATA MANAGEMENT & LOCAL FALLBACKS
+       ===================================================================== */
+    const MOCK_MEMBERS = [
+      { id: "1", name: "Abraham Thukalil", father_name: "Joseph Thukalil", mother_name: "Mariam Thukalil", photo_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400", bio: "Senior patriarch, dedicated to community welfare and family lineage.", branch: "Kerala Central", password: "123", status: "verified" },
+      { id: "2", name: "Dr. Evelyn Thukalil", father_name: "Abraham Thukalil", mother_name: "Grace Thukalil", photo_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400", bio: "Cardiologist & researcher based in London.", branch: "UK Branch", password: "123", status: "verified" },
+      { id: "3", name: "Mathew Thukalil", father_name: "Thomas Thukalil", mother_name: "Anna Thukalil", photo_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400", bio: "Architect & urban heritage designer.", branch: "Dubai Chapter", password: "123", status: "verified" },
+      { id: "4", name: "Daniel Thukalil", father_name: "abraham thukalil", mother_name: "GRACE THUKALIL", photo_url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400", bio: "Engineer, keeps the family home in Kerala.", branch: "Kerala Central", password: "123", status: "verified" },
+      { id: "5", name: "Philip Thukalil", father_name: "Joseph Thukalil", mother_name: "Mariam Thukalil", photo_url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400", bio: "Younger brother of Abraham.", branch: "Kerala North", password: "123", status: "verified" },
+      { id: "6", name: "Noah Thukalil", father_name: "Daniel Thukalil", mother_name: "Priya Thukalil", photo_url: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400", bio: "Youngest of the family.", branch: "Kerala Central", password: "123", status: "verified" }
+    ];
+
+    const MOCK_GUESTBOOK = [
+      { id: "101", author_name: "Dr. Evelyn Thukalil", message: "So proud to see our heritage preserved in such a magnificent luxury portal!", created_at: "2026-10-20", is_featured: true },
+      { id: "102", author_name: "Uncle George", message: "Blessings to all family members across the globe. Always stay united.", created_at: "2026-10-24", is_featured: true }
+    ];
+
+    const MOCK_ACHIEVEMENTS = [
+      { id: "201", member_name: "Dr. Evelyn Thukalil", title: "Royal College Fellowship Award", description: "Honored with the international research fellowship for cardiology advancement.", image_url: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600", created_at: "2026-09-15", is_featured: true },
+      { id: "202", member_name: "Mathew Thukalil", title: "Global Architectural Heritage Expo Winner", description: "First place design award for eco-sustainable community infrastructure.", image_url: "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=600", created_at: "2026-10-01", is_featured: true }
+    ];
+
+    let currentMembers = [...MOCK_MEMBERS];
+    let currentGuestbook = [...MOCK_GUESTBOOK];
+    let currentAchievements = [...MOCK_ACHIEVEMENTS];
+
+    async function loadMembers() {
+      if (db.isReady()) {
+        const data = await db.select("family_members", "status=eq.verified&order=created_at.desc");
+        if (data && Array.isArray(data)) currentMembers = data;
+      }
+      renderMembersGrid(currentMembers);
+      renderFamilyTree(currentMembers);
+      $("#cntMembers").textContent = currentMembers.filter(m => m.status === 'verified').length;
+    }
+
+    // Social links are stored as a small { platform: url } object (JSONB column).
+    // Renders a row of icon links; returns "" when there's nothing to show.
+    const SOCIAL_PLATFORMS = [
+      { key: "instagram", label: "Instagram", icon: "📷" },
+      { key: "facebook", label: "Facebook", icon: "📘" },
+      { key: "linkedin", label: "LinkedIn", icon: "💼" },
+      { key: "x", label: "X / Twitter", icon: "✖" },
+      { key: "youtube", label: "YouTube", icon: "▶" },
+      { key: "website", label: "Website", icon: "🔗" }
+    ];
+    function renderSocialLinks(social) {
+      let obj = social || {};
+      if (typeof obj === "string") { try { obj = JSON.parse(obj); } catch (e) { obj = {}; } }
+      const links = SOCIAL_PLATFORMS.filter(p => obj && obj[p.key]).map(p => `
+        <a href="${ftEsc(obj[p.key])}" target="_blank" rel="noopener noreferrer" title="${p.label}"
+           style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%;
+                  background:rgba(var(--accent-rgb),.12); border:1px solid var(--line); color:var(--accent2);
+                  text-decoration:none; font-size:14px; margin:0 6px 6px 0;">${p.icon}</a>
+      `).join('');
+      return links ? `<div style="margin-top:10px;">${links}</div>` : '';
+    }
+
+    function renderMembersGrid(list) {
+      const container = $("#membersGrid");
+      const verified = list.filter(m => m.status === 'verified');
+      if (!verified.length) {
+        container.innerHTML = `<p class="muted">No verified family members found matching your search.</p>`;
+        return;
+      }
+
+      container.innerHTML = verified.map(m => `
+        <div class="member-card rv in">
+          <div class="member-img-wrap">
+            <img src="${m.photo_url}" alt="${m.name}" onerror="this.src='https://placehold.co/400x300/0f161e/d4af37?text=Thukalil+Member'">
+          </div>
+          <div class="member-info">
+            <div class="member-name">${m.name}</div>
+            <div class="member-parents">
+              <span><strong>Father:</strong> ${m.father_name}</span><br>
+              <span><strong>Mother:</strong> ${m.mother_name}</span>
+            </div>
+            ${m.branch ? `<div style="font-size: 12px; color: var(--accent); margin-bottom: 8px;">📍 ${m.branch}</div>` : ''}
+            <p style="font-size: 14px; color: var(--muted);">${m.bio || 'Proud member of the Thukalil lineage.'}</p>
+            ${renderSocialLinks(m.social_links)}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* =====================================================================
+       5b. LIVING FAMILY TREE
+       Members are linked purely by name (case/space-insensitive):
+       everyone with the same father_name is a sibling; a member whose
+       name matches someone's father/mother becomes that person's child.
+       ===================================================================== */
+    const FT = { zoom: 1, people: new Map(), view: "tree" };
+    const ftNorm = (s) => (s || "").toLowerCase().replace(/\s+/g, " ").trim();
+    const ftEsc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const ftClean = (s) => (s || "").replace(/\s+/g, " ").trim();
+
+    function buildFamilyGraph(list) {
+      const people = new Map();
+      const get = (name) => {
+        const k = ftNorm(name);
+        if (!k) return null;
+        if (!people.has(k)) people.set(k, { key: k, name: ftClean(name), member: null, children: [], spouses: new Set(), parentKey: null, motherKey: null, spouseOf: null, search: k });
+        return people.get(k);
+      };
+      const members = list.filter(m => m.status === "verified");
+      members.forEach(m => { const p = get(m.name); p.member = m; p.name = ftClean(m.name); });
+      members.forEach(m => {
+        const p = get(m.name), f = get(m.father_name), mo = get(m.mother_name);
+        p.search = ftNorm(m.name + " " + m.father_name + " " + m.mother_name);
+        if (f && f !== p) {
+          p.parentKey = f.key;
+          if (!f.children.includes(p)) f.children.push(p);
+          if (mo && mo !== p && mo !== f) { f.spouses.add(mo.key); if (!mo.spouseOf) mo.spouseOf = f.key; p.motherKey = mo.key; }
+        } else if (mo && mo !== p) {
+          p.parentKey = mo.key; p.motherKey = mo.key;
+          if (!mo.children.includes(p)) mo.children.push(p);
+        }
+      });
+      const roots = [...people.values()].filter(p => !p.parentKey && !p.spouseOf);
+      return { people, roots };
+    }
+
+    function ftNode(p, extra) {
+      const m = p.member, init = ftEsc(p.name.charAt(0).toUpperCase() || "?");
+      const sub = m ? (m.branch || "") : "Not registered yet";
+      const badge = p.children.length ? `<span class="fbadge" title="${p.children.length} child(ren)">${p.children.length}</span>` : "";
+      const img = m && m.photo_url ? `<img src="${ftEsc(m.photo_url)}" alt="" loading="lazy" onerror="this.style.display='none'">` : "";
+      return `<button type="button" class="fnode ${m ? "" : "ghost"} ${extra || ""}" data-key="${ftEsc(p.key)}" data-s="${ftEsc(p.search)}" aria-label="${ftEsc(p.name)}">
+        <span class="fring"><span class="finit">${init}</span>${img}${badge}</span>
+        <span class="fname">${ftEsc(p.name)}</span><span class="fsub">${ftEsc(sub)}</span></button>`;
+    }
+
+    const FT_KNOT = `<svg class="knot" viewBox="0 0 26 26" fill="none" aria-hidden="true"><circle cx="9.5" cy="13" r="6" style="stroke:var(--accent)" stroke-width="2"/><circle cx="16.5" cy="13" r="6" style="stroke:var(--accent2)" stroke-width="2"/></svg>`;
+
+    function ftBranch(p, seen) {
+      if (seen.has(p.key)) return "";
+      seen.add(p.key);
+      const spouses = [...p.spouses].map(k => FT.people.get(k)).filter(Boolean);
+      const couple = ftNode(p) + spouses.map(s => FT_KNOT + ftNode(s, "spouse")).join("");
+      const kids = p.children.filter(c => !seen.has(c.key)).map(c => ftBranch(c, seen)).join("");
+      return `<li><div class="couple">${couple}</div>${kids ? `<ul>${kids}</ul>` : ""}</li>`;
+    }
+
+    function renderFamilyTree(list) {
+      const canvas = $("#treeCanvas");
+      if (!canvas) return;
+      const { people, roots } = buildFamilyGraph(list);
+      FT.people = people;
+      if (![...people.values()].some(p => p.member)) {
+        canvas.innerHTML = `<p class="muted" style="padding:60px 0;">No verified family members yet. Register to plant the first branch 🌱</p>`;
+        return;
+      }
+      const seen = new Set();
+      let houses = roots.map(r => {
+        const before = seen.size;
+        const html = ftBranch(r, seen);
+        const count = [...seen].filter(k => people.get(k).member).length;
+        return { r, html, count };
+      });
+      // anything unreached (e.g. circular entries) still gets shown
+      [...people.values()].filter(p => !seen.has(p.key) && !(p.spouseOf && !p.member)).forEach(p => {
+        if (seen.has(p.key)) return;
+        houses.push({ r: p, html: ftBranch(p, seen), count: 0 });
+      });
+      let prev = 0;
+      houses = houses.map(h => { const c = h.count - prev; prev = h.count; return { ...h, count: Math.max(c, 0) }; });
+      canvas.innerHTML = houses.filter(h => h.html).map(h => `
+        <div class="fhouse">
+          <div class="fhouse-title">House of ${ftEsc(h.r.name)}<small>${h.count} registered member${h.count === 1 ? "" : "s"}</small></div>
+          <div class="fhouse-trunk"></div>
+          <div class="ftree"><ul>${h.html}</ul></div>
+        </div>`).join("");
+      $("#kinNames").innerHTML = [...people.values()].map(p => `<option value="${ftEsc(p.name)}">`).join("");
+      applyMemberSearch($("#memberSearch").value);
+      applyTreeZoom();
+    }
+
+    function applyTreeZoom() { const c = $("#treeCanvas"); if (c) c.style.zoom = FT.zoom; }
+    function centerTree() {
+      const sc = $("#treeScroll");
+      requestAnimationFrame(() => { if (sc.clientWidth) sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2; });
+    }
+    function treeZoom(d) {
+      FT.zoom = d === 0 ? 1 : Math.min(1.6, Math.max(0.5, +(FT.zoom + d).toFixed(2)));
+      applyTreeZoom(); centerTree();
+    }
+
+    function setTreeView(v) {
+      FT.view = v;
+      $("#vwTree").classList.toggle("on", v === "tree");
+      $("#vwCards").classList.toggle("on", v === "cards");
+      $("#treeStage").style.display = v === "tree" ? "block" : "none";
+      $("#zoomCtl").style.display = v === "tree" ? "inline-flex" : "none";
+      $("#membersGrid").style.display = v === "cards" ? "grid" : "none";
+      if (v === "tree") centerTree();
+    }
+
+    function applyMemberSearch(raw) {
+      const q = ftNorm(raw);
+      const filtered = q ? currentMembers.filter(m => ftNorm(m.name + " " + m.father_name + " " + m.mother_name).includes(q)) : currentMembers;
+      renderMembersGrid(filtered);
+      const nodes = $$("#treeCanvas .fnode");
+      let first = null;
+      nodes.forEach(n => {
+        const hit = q && n.dataset.s.includes(q);
+        n.classList.toggle("hit", !!hit);
+        n.classList.toggle("dim", !!q && !hit);
+        if (hit && !first) first = n;
+      });
+      if (first) first.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+    $("#memberSearch").addEventListener("input", (e) => applyMemberSearch(e.target.value));
+
+    // click a person -> relatives popup
+    function openKin(key) {
+      const p = FT.people.get(key);
+      if (!p) return;
+      const m = p.member;
+      const byKey = (k) => FT.people.get(k);
+      const link = (x) => `<button type="button" class="kin-link" data-key="${ftEsc(x.key)}">${ftEsc(x.name)}</button>`;
+      const fatherName = m ? ftClean(m.father_name) : "", motherName = m ? ftClean(m.mother_name) : "";
+      const father = m && byKey(ftNorm(m.father_name)), mother = m && byKey(ftNorm(m.mother_name));
+      const parentNode = p.parentKey && byKey(p.parentKey);
+      const sibs = parentNode ? parentNode.children.filter(c => c !== p) : [];
+      const spouses = [...p.spouses].map(byKey).filter(Boolean);
+      const husband = p.spouseOf && byKey(p.spouseOf);
+      const rel = (title, items) => items.length ? `<div class="kin-rel"><b>${title}</b>${items.join("")}</div>` : "";
+      const photo = m && m.photo_url ? `<img class="kin-photo" src="${ftEsc(m.photo_url)}" alt="" onerror="this.style.display='none'">` : `<div class="kin-photo finit" style="display:flex;align-items:center;justify-content:center;font-size:40px;">${ftEsc(p.name.charAt(0).toUpperCase())}</div>`;
+      $("#kinBox").innerHTML = `
+        <button class="kin-close" onclick="closeKin()" aria-label="Close">×</button>
+        ${photo}
+        <h3>${ftEsc(p.name)}</h3>
+        <div class="muted" style="font-size:13px;">${m ? (m.branch ? "📍 " + ftEsc(m.branch) : "Registered member") : "Named as a parent — not registered yet"}</div>
+        ${m && m.bio ? `<p class="muted" style="margin-top:12px;">${ftEsc(m.bio)}</p>` : ""}
+        ${m ? renderSocialLinks(m.social_links) : ""}
+        ${rel("Parents", m ? [fatherName ? (father ? link(father) : `<span class="kin-plain">${ftEsc(fatherName)}</span>`) : "", motherName ? (mother ? link(mother) : `<span class="kin-plain">${ftEsc(motherName)}</span>`) : ""].filter(Boolean) : [])}
+        ${rel("Brothers & Sisters", sibs.map(link))}
+        ${rel(husband ? "Married to" : "Spouse", (husband ? [husband] : spouses).map(link))}
+        ${rel("Children", p.children.map(link))}`;
+      $("#kinModal").classList.add("open");
+    }
+    function closeKin() { $("#kinModal").classList.remove("open"); }
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeKin(); });
+    document.addEventListener("click", (e) => {
+      const n = e.target.closest(".fnode, .kin-link");
+      if (!n || !n.dataset.key) return;
+      if (FT.moved) { FT.moved = false; return; }
+      openKin(n.dataset.key);
+    });
+
+    // drag-to-pan with a mouse (touch scrolls natively)
+    (function () {
+      const sc = $("#treeScroll"); let down = false, x = 0, y = 0, l = 0, t = 0;
+      sc.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse") return; down = true; FT.moved = false; x = e.clientX; y = e.clientY; l = sc.scrollLeft; t = sc.scrollTop; });
+      window.addEventListener("pointermove", e => {
+        if (!down) return;
+        const dx = e.clientX - x, dy = e.clientY - y;
+        if (Math.abs(dx) + Math.abs(dy) > 6) { FT.moved = true; sc.classList.add("drag"); }
+        if (FT.moved) { sc.scrollLeft = l - dx; sc.scrollTop = t - dy; }
+      });
+      window.addEventListener("pointerup", () => { down = false; sc.classList.remove("drag"); setTimeout(() => { FT.moved = false; }, 0); });
+      // drifting leaves
+      const bg = $("#leafBg");
+      for (let i = 0; i < 8; i++) { const s = document.createElement("span"); s.style.left = (i * 13 + 5) + "%"; s.style.animationDelay = (-i * 2.1) + "s"; s.style.animationDuration = (12 + i * 1.7) + "s"; bg.appendChild(s); }
+    })();
+
+    // register form: show existing relatives while typing parent names
+    function updateKinHint() {
+      const hint = $("#kinHint"); if (!hint) return;
+      const f = ftNorm($("#regFather").value), mo = ftNorm($("#regMother").value);
+      const verified = currentMembers.filter(m => m.status === "verified");
+      const sib = verified.filter(m => (f && ftNorm(m.father_name) === f) || (!f && mo && ftNorm(m.mother_name) === mo));
+      const parent = FT.people.get(f) && FT.people.get(f).member;
+      const bits = [];
+      if (parent) bits.push(`${ftEsc(parent.name)} is already in the tree — you'll be added as their child.`);
+      if (sib.length) bits.push(`🌳 Brothers & sisters already registered: ${sib.map(s => ftEsc(s.name)).join(", ")}.`);
+      if (!bits.length && (f || mo) && verified.length) bits.push("No relatives found under these names yet — you'll start a new branch. Check the spelling if you expected a match.");
+      hint.innerHTML = bits.join("<br>");
+      hint.style.display = bits.length ? "block" : "none";
+    }
+    $("#regFather").addEventListener("input", updateKinHint);
+    $("#regMother").addEventListener("input", updateKinHint);
+
+    /* =====================================================================
+       6. ACHIEVEMENTS SYSTEM
+       ===================================================================== */
+    async function loadAchievements() {
+      if (db.isReady()) {
+        const data = await db.select("achievements", "order=created_at.desc");
+        if (data && Array.isArray(data)) currentAchievements = data;
+      }
+      renderAchievementsGrid(currentAchievements);
+    }
+
+    function renderAchievementsGrid(list) {
+      const container = $("#achievementsGrid");
+      if (!list.length) {
+        container.innerHTML = `<p class="muted">No family achievements uploaded yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = list.map(a => `
+        <div class="achieve-card rv in">
+          <div class="achieve-img-wrap">
+            <img src="${a.image_url}" alt="${a.title}" onerror="this.src='https://placehold.co/600x400/0f161e/d4af37?text=Achievement'">
+          </div>
+          <div class="achieve-body">
+            <span class="tag" style="margin-bottom:4px">${a.member_name || 'Thukalil Member'}</span>
+            <h3 style="font-size: 20px; color: var(--accent2); margin-bottom: 8px;">${a.title}</h3>
+            <p style="font-size: 14px; color: var(--muted);">${a.description}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* =====================================================================
+       7. GUESTBOOK TRIBUTES
+       ===================================================================== */
+    async function loadGuestbook() {
+      if (db.isReady()) {
+        const data = await db.select("guestbook", "order=created_at.desc");
+        if (data && Array.isArray(data)) currentGuestbook = data;
+      }
+      renderGuestbook(currentGuestbook);
+      $("#cntTributes").textContent = currentGuestbook.length;
+    }
+
+    function renderGuestbook(list) {
+      const container = $("#guestbookList");
+      if (!list.length) {
+        container.innerHTML = `<p class="muted">No tributes written yet. Be the first!</p>`;
+        return;
+      }
+
+      container.innerHTML = list.map(g => `
+        <div class="tribute-card">
+          <div class="tribute-author">${g.author_name}</div>
+          <div class="tribute-date">${g.created_at ? new Date(g.created_at).toLocaleDateString() : 'Recently'}</div>
+          <p style="color: var(--fg); font-size: 15px;">"${g.message}"</p>
+        </div>
+      `).join('');
+    }
+
+    async function handleGuestbookSubmit(author_name, message, msgEl, formEl) {
+      msgEl.textContent = "Posting tribute...";
+      const entry = { author_name, message, is_featured: false };
+
+      if (db.isReady()) {
+        const success = await db.insert("guestbook", entry);
+        if (success) {
+          msgEl.textContent = "Tribute posted successfully! ✓";
+          loadGuestbook();
+          if (formEl) formEl.reset();
+        } else msgEl.textContent = "Failed to post tribute.";
+      } else {
+        entry.id = Date.now().toString();
+        entry.created_at = new Date().toISOString();
+        currentGuestbook.unshift(entry);
+        renderGuestbook(currentGuestbook);
+        msgEl.textContent = "Posted to local guestbook! ✓";
+        if (formEl) formEl.reset();
+      }
+    }
+
+    $("#guestbookForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      handleGuestbookSubmit(fd.get("author_name"), fd.get("message"), $("#gbMsg"), e.target);
+    });
+
+    $("#guestbookModalForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      handleGuestbookSubmit(fd.get("author_name"), fd.get("message"), $("#gbModalMsg"), e.target);
+      setTimeout(() => closeGuestbookModal(), 1200);
+    });
+
+    function openGuestbookModal() { $("#gbModal").classList.add("open"); }
+    function closeGuestbookModal() { $("#gbModal").classList.remove("open"); }
+
+    /* =====================================================================
+       8. HOME PAGE FEATURED SPOTLIGHTS
+       ===================================================================== */
+    async function loadHomeFeatures() {
+      let featsAchieve = [];
+      let featsTributes = [];
+
+      if (db.isReady()) {
+        const aData = await db.select("achievements", "is_featured=eq.true&order=created_at.desc");
+        if (aData && Array.isArray(aData)) featsAchieve = aData;
+        const gData = await db.select("guestbook", "is_featured=eq.true&order=created_at.desc");
+        if (gData && Array.isArray(gData)) featsTributes = gData;
+      } else {
+        featsAchieve = currentAchievements.filter(a => a.is_featured);
+        featsTributes = currentGuestbook.filter(g => g.is_featured);
+      }
+
+      // Render Featured Achievements
+      const achContainer = $("#featuredAchievementsGrid");
+      if (!featsAchieve.length) {
+        achContainer.innerHTML = `<p class="muted">No featured achievements spotlighted yet.</p>`;
+      } else {
+        achContainer.innerHTML = featsAchieve.map(a => `
+          <div class="achieve-card">
+            <div class="achieve-img-wrap">
+              <img src="${a.image_url}" alt="${a.title}">
+            </div>
+            <div class="achieve-body">
+              <span class="tag" style="margin-bottom:4px">${a.member_name || 'Thukalil Member'}</span>
+              <h3 style="font-size: 20px; color: var(--accent2); margin-bottom: 8px;">${a.title}</h3>
+              <p style="font-size: 14px; color: var(--muted);">${a.description}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render Featured Tributes
+      const tribContainer = $("#featuredTributesGrid");
+      if (!featsTributes.length) {
+        tribContainer.innerHTML = `<p class="muted">No spotlight tributes selected yet.</p>`;
+      } else {
+        tribContainer.innerHTML = featsTributes.map(g => `
+          <div class="tribute-card">
+            <div class="tribute-author">${g.author_name}</div>
+            <p style="color: var(--fg); font-size: 15px; margin-top:6px;">"${g.message}"</p>
+          </div>
+        `).join('');
+      }
+    }
+
+    /* =====================================================================
+       9. MEMBER AUTHENTICATION & MY INFO DASHBOARD
+       ===================================================================== */
+    function switchAuthTab(tab) {
+      $("#authRegBox").style.display = tab === 'reg' ? 'block' : 'none';
+      $("#authLogBox").style.display = tab === 'log' ? 'block' : 'none';
+      $("#btnTabReg").className = tab === 'reg' ? 'btn' : 'btn btn-outline';
+      $("#btnTabLog").className = tab === 'log' ? 'btn' : 'btn btn-outline';
+    }
+
+    // Build a clean { platform: url } object from a lookup function, dropping empties
+    function buildSocialLinks(get) {
+      const platforms = ["instagram", "facebook", "linkedin", "x", "youtube", "website"];
+      const out = {};
+      platforms.forEach(p => {
+        const v = (get(p) || "").trim();
+        if (v) out[p] = v;
+      });
+      return out;
+    }
+
+    // Submit Registration Form with Password
+    $("#regForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = $("#regMsg");
+      msg.textContent = "Submitting registration details...";
+
+      const fd = new FormData(e.target);
+      const newMember = {
+        name: fd.get("name"),
+        father_name: fd.get("father_name"),
+        mother_name: fd.get("mother_name"),
+        password: fd.get("password"),
+        photo_url: fd.get("photo_url"),
+        branch: fd.get("branch") || "",
+        bio: fd.get("bio") || "",
+        social_links: buildSocialLinks(p => fd.get("social_" + p)),
+        status: "pending"
+      };
+
+      if (db.isReady()) {
+        const success = await db.insert("family_members", newMember);
+        msg.textContent = success ? "Registration complete! Waiting for confirmation from council. ✓" : "Submission error.";
+      } else {
+        newMember.id = Date.now().toString();
+        currentMembers.push(newMember);
+        msg.textContent = "Registration complete! Waiting for confirmation (Local Demo Mode) ✓";
+      }
+
+      if (msg.textContent.includes("✓")) {
+        e.target.reset();
+        $("#regPhotoPrev").style.display = "none";
+      }
+    });
+
+    // Login Form with Password Authentication
+    $("#loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = $("#loginName").value.trim();
+      const pass = $("#loginPass").value.trim();
+      const msg = $("#loginMsg");
+      msg.textContent = "Authenticating...";
+
+      let member = null;
+      if (db.isReady()) {
+        const res = await db.select("family_members", `name=ilike.${encodeURIComponent(name)}`);
+        if (res && res.length) member = res[0];
+      } else {
+        member = currentMembers.find(m => m.name.toLowerCase() === name.toLowerCase());
+      }
+
+      if (!member) {
+        msg.textContent = "Member record not found. Please register first.";
+        return;
+      }
+
+      if (member.password && member.password !== pass) {
+        msg.textContent = "Incorrect password. Please try again.";
+        return;
+      }
+
+      if (member.status !== "verified") {
+        msg.textContent = "Registration pending approval. Please wait for council verification.";
+        return;
+      }
+
+      loggedInUser = member;
+      msg.textContent = "Login successful! Redirecting to dashboard... ✓";
+      renderNav();
+      setTimeout(() => showPage("web-myinfo"), 1000);
+    });
+
+    function logoutUser() {
+      loggedInUser = null;
+      renderNav();
+      showPage("web-home");
+    }
+
+    // Permanently delete the logged-in member's own account
+    async function deleteMyAccount() {
+      if (!loggedInUser) return;
+      const msg = $("#deleteAcctMsg");
+      const typed = ($("#deleteConfirmName").value || "").trim();
+      if (!typed || typed.toLowerCase() !== (loggedInUser.name || "").trim().toLowerCase()) {
+        msg.textContent = "Please type your full name exactly as registered to confirm.";
+        return;
+      }
+      msg.textContent = "Deleting your account...";
+
+      if (db.isReady()) {
+        const ok = await db.delete("family_members", "id", loggedInUser.id);
+        if (!ok) { msg.textContent = "Could not delete account. Please try again."; return; }
+      } else {
+        currentMembers = currentMembers.filter(m => m.id !== loggedInUser.id);
+      }
+
+      msg.textContent = "Account deleted. Redirecting...";
+      loggedInUser = null;
+      renderNav();
+      await loadMembers();
+      setTimeout(() => showPage("web-home"), 800);
+    }
+
+    function populateMyInfo() {
+      if (!loggedInUser) return;
+      $("#myInfoTitle").textContent = `Welcome, ${loggedInUser.name}`;
+      $("#myInfoName").value = loggedInUser.name || "";
+      $("#myInfoPhoto").value = loggedInUser.photo_url || "";
+      if (loggedInUser.photo_url) {
+        $("#myInfoPhotoPrev").src = loggedInUser.photo_url;
+        $("#myInfoPhotoPrev").style.display = "block";
+      }
+      $("#myInfoBranch").value = loggedInUser.branch || "";
+      $("#myInfoBio").value = loggedInUser.bio || "";
+
+      let social = loggedInUser.social_links || {};
+      if (typeof social === "string") { try { social = JSON.parse(social); } catch (e) { social = {}; } }
+      $("#myInfoSocialInstagram").value = social.instagram || "";
+      $("#myInfoSocialFacebook").value = social.facebook || "";
+      $("#myInfoSocialLinkedin").value = social.linkedin || "";
+      $("#myInfoSocialX").value = social.x || "";
+      $("#myInfoSocialYoutube").value = social.youtube || "";
+      $("#myInfoSocialWebsite").value = social.website || "";
+    }
+
+    // Update Profile Info
+    $("#myInfoForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = $("#myInfoMsg");
+      msg.textContent = "Updating profile...";
+
+      const socialIds = { instagram: "myInfoSocialInstagram", facebook: "myInfoSocialFacebook", linkedin: "myInfoSocialLinkedin", x: "myInfoSocialX", youtube: "myInfoSocialYoutube", website: "myInfoSocialWebsite" };
+      const updates = {
+        name: $("#myInfoName").value,
+        photo_url: $("#myInfoPhoto").value,
+        branch: $("#myInfoBranch").value,
+        bio: $("#myInfoBio").value,
+        social_links: buildSocialLinks(p => $("#" + socialIds[p]).value)
+      };
+
+      if (db.isReady()) {
+        await db.update("family_members", "id", loggedInUser.id, updates);
+      }
+      Object.assign(loggedInUser, updates);
+      msg.textContent = "Profile details saved successfully! ✓";
+    });
+
+    // Add Member Achievement
+    $("#addAchieveForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = $("#achieveMsg");
+      msg.textContent = "Uploading achievement...";
+
+      const fd = new FormData(e.target);
+      const newAch = {
+        member_name: loggedInUser.name,
+        title: fd.get("title"),
+        image_url: fd.get("image_url"),
+        description: fd.get("description"),
+        is_featured: false
+      };
+
+      if (db.isReady()) {
+        const ok = await db.insert("achievements", newAch);
+        msg.textContent = ok ? "Achievement submitted to registry! ✓" : "Upload failed.";
+      } else {
+        newAch.id = Date.now().toString();
+        currentAchievements.unshift(newAch);
+        msg.textContent = "Achievement published locally! ✓";
+      }
+
+      if (msg.textContent.includes("✓")) {
+        e.target.reset();
+        $("#achieveImgPrev").style.display = "none";
+        loadAchievements();
+      }
+    });
+
+    /* =====================================================================
+       10. ADMIN PANEL & MODERATION
+       ===================================================================== */
+    function unlockAdmin() {
+      const pin = $("#adminPinInput").value;
+      const msg = $("#adminAuthMsg");
+      
+      if (pin === "7777" || pin === "admin") {
+        $("#adminAuthSection").style.display = "none";
+        $("#adminContentSection").style.display = "block";
+        loadAdminQueue();
+      } else {
+        msg.textContent = "Incorrect PIN code. Use '7777'.";
+      }
+    }
+
+    function showAdminSub(sub) {
+      $("#adminSubQueue").style.display = sub === 'queue' ? 'block' : 'none';
+      $("#adminSubRegistered").style.display = sub === 'registered' ? 'block' : 'none';
+      $("#adminSubModeration").style.display = sub === 'moderation' ? 'block' : 'none';
+      $("#adminSubAchievements").style.display = sub === 'achievements' ? 'block' : 'none';
+      $("#adminSubSettings").style.display = sub === 'settings' ? 'block' : 'none';
+
+      if (sub === 'queue') loadAdminQueue();
+      if (sub === 'registered') loadAdminRegistered();
+      if (sub === 'moderation') loadAdminModeration();
+      if (sub === 'achievements') loadAdminAchievements();
+    }
+
+    /* ---- Registered People (admin) ---- */
+    let adminRegisteredCache = [];
+    async function loadAdminRegistered() {
+      let list = [];
+      if (db.isReady()) {
+        const res = await db.select("family_members", "status=eq.verified&order=name.asc");
+        if (res && Array.isArray(res)) list = res;
+      } else {
+        list = currentMembers.filter(m => m.status === 'verified');
+      }
+      adminRegisteredCache = list;
+      renderAdminRegistered(list);
+    }
+
+    function renderAdminRegistered(list) {
+      const container = $("#adminRegisteredList");
+      if (!list.length) {
+        container.innerHTML = `<p class="muted">No registered members yet.</p>`;
+        return;
+      }
+      container.innerHTML = list.map(m => `
+        <div class="card" style="display: flex; flex-direction: column; gap: 10px;">
+          <span class="admin-badge badge-verified">Verified</span>
+          <img src="${m.photo_url}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px;" onerror="this.src='https://placehold.co/300x160/0f161e/d4af37?text=Thukalil+Member'">
+          <h3 style="margin: 0; font-size: 20px;">${m.name}</h3>
+          <p style="font-size: 13px;"><strong>Father:</strong> ${m.father_name}<br><strong>Mother:</strong> ${m.mother_name}</p>
+          ${m.branch ? `<p style="font-size: 12px; color: var(--accent);">📍 ${m.branch}</p>` : ''}
+          <div style="display: flex; gap: 10px; margin-top: auto;">
+            <button class="btn btn-danger" style="padding: 8px 16px; font-size: 13px;" onclick="removeRegisteredMember('${m.id}')">Remove from Tree</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function applyRegisteredSearch(raw) {
+      const q = (raw || "").toLowerCase().trim();
+      const base = adminRegisteredCache;
+      const filtered = q ? base.filter(m => (m.name + " " + m.father_name + " " + m.mother_name).toLowerCase().includes(q)) : base;
+      renderAdminRegistered(filtered);
+    }
+    const registeredSearchInput = $("#registeredSearch");
+    if (registeredSearchInput) registeredSearchInput.addEventListener("input", (e) => applyRegisteredSearch(e.target.value));
+
+    async function removeRegisteredMember(id) {
+      if (!confirm("Remove this member from the family tree? This cannot be undone.")) return;
+      if (db.isReady()) {
+        await db.delete("family_members", "id", id);
+      }
+      currentMembers = currentMembers.filter(m => m.id !== id);
+      loadAdminRegistered();
+      loadMembers();
+    }
+
+    async function loadAdminQueue() {
+      const container = $("#pendingList");
+      let pendings = [];
+
+      if (db.isReady()) {
+        const res = await db.select("family_members", "status=eq.pending");
+        if (res && Array.isArray(res)) pendings = res;
+      } else {
+        pendings = currentMembers.filter(m => m.status === 'pending');
+      }
+
+      if (!pendings.length) {
+        container.innerHTML = `<p class="muted">No pending member registrations to verify.</p>`;
+        return;
+      }
+
+      container.innerHTML = pendings.map(m => `
+        <div class="card" style="display: flex; flex-direction: column; gap: 10px;">
+          <span class="admin-badge badge-pending">Pending Approval</span>
+          <img src="${m.photo_url}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px;" onerror="this.src='https://placehold.co/300x160/0f161e/d4af37?text=Applicant'">
+          <h3 style="margin: 0; font-size: 20px;">${m.name}</h3>
+          <p style="font-size: 13px;"><strong>Father:</strong> ${m.father_name}<br><strong>Mother:</strong> ${m.mother_name}</p>
+          <p style="font-size: 13px; color: var(--muted);">${m.bio || 'No bio provided'}</p>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn" style="padding: 8px 16px; font-size: 13px;" onclick="verifyMember('${m.id}')">Verify & Add to Tree</button>
+            <button class="btn btn-danger" style="padding: 8px 16px; font-size: 13px;" onclick="rejectMember('${m.id}')">Reject</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function verifyMember(id) {
+      if (db.isReady()) {
+        await db.update("family_members", "id", id, { status: 'verified' });
+      } else {
+        const m = currentMembers.find(x => x.id === id);
+        if (m) m.status = 'verified';
+      }
+      loadAdminQueue();
+      loadMembers();
+    }
+
+    async function rejectMember(id) {
+      if (db.isReady()) {
+        await db.delete("family_members", "id", id);
+      } else {
+        currentMembers = currentMembers.filter(x => x.id !== id);
+      }
+      loadAdminQueue();
+    }
+
+    async function loadAdminModeration() {
+      const container = $("#adminGbList");
+      if (!currentGuestbook.length) {
+        container.innerHTML = `<p class="muted">No guestbook comments to moderate.</p>`;
+        return;
+      }
+
+      container.innerHTML = currentGuestbook.map(g => `
+        <div class="tribute-card" style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+          <div>
+            <div class="tribute-author">${g.author_name}</div>
+            <p style="font-size: 14px; margin-top: 4px;">"${g.message}"</p>
+          </div>
+          <div style="display:flex; align-items:center; gap: 15px;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:var(--accent2); cursor:pointer;">
+              <input type="checkbox" ${g.is_featured ? 'checked' : ''} onchange="toggleFeatureTribute('${g.id}', this.checked)"> Feature on Home Page
+            </label>
+            <button class="btn btn-danger" style="padding: 6px 14px; font-size: 12px; white-space: nowrap;" onclick="deleteComment('${g.id}')">Delete Comment</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function toggleFeatureTribute(id, isFeatured) {
+      if (db.isReady()) {
+        await db.update("guestbook", "id", id, { is_featured: isFeatured });
+      }
+      const item = currentGuestbook.find(g => g.id === id);
+      if (item) item.is_featured = isFeatured;
+      loadHomeFeatures();
+    }
+
+    async function deleteComment(id) {
+      if (db.isReady()) {
+        await db.delete("guestbook", "id", id);
+      }
+      currentGuestbook = currentGuestbook.filter(g => g.id !== id);
+      loadAdminModeration();
+      loadGuestbook();
+    }
+
+    async function loadAdminAchievements() {
+      const container = $("#adminAchieveList");
+      if (!currentAchievements.length) {
+        container.innerHTML = `<p class="muted">No achievements to manage.</p>`;
+        return;
+      }
+
+      container.innerHTML = currentAchievements.map(a => `
+        <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+          <img src="${a.image_url}" style="width:100%; height:140px; object-fit:cover; border-radius:10px;">
+          <h3 style="margin:0; font-size:18px;">${a.title}</h3>
+          <p style="font-size:12px; color:var(--accent);">${a.member_name || 'Member'}</p>
+          <p style="font-size:13px; color:var(--muted);">${a.description}</p>
+          <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:10px;">
+            <label style="font-size:12px; color:var(--accent2); cursor:pointer;">
+              <input type="checkbox" ${a.is_featured ? 'checked' : ''} onchange="toggleFeatureAchievement('${a.id}', this.checked)"> Feature on Home
+            </label>
+            <button class="btn btn-danger" style="padding:4px 10px; font-size:11px;" onclick="deleteAchievement('${a.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function toggleFeatureAchievement(id, isFeatured) {
+      if (db.isReady()) {
+        await db.update("achievements", "id", id, { is_featured: isFeatured });
+      }
+      const item = currentAchievements.find(a => a.id === id);
+      if (item) item.is_featured = isFeatured;
+      loadHomeFeatures();
+    }
+
+    async function deleteAchievement(id) {
+      if (db.isReady()) {
+        await db.delete("achievements", "id", id);
+      }
+      currentAchievements = currentAchievements.filter(a => a.id !== id);
+      loadAdminAchievements();
+      loadAchievements();
+    }
+
+    // live preview while dragging the colour pickers
+    ["#cfgAccent", "#cfgAccent2"].forEach(sel => $(sel).addEventListener("input", () => applyTheme($("#cfgAccent").value, $("#cfgAccent2").value)));
+
+    // Dynamic Branding & Style Configuration Form
+    $("#configForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = $("#cfgMsg");
+      msg.textContent = "Saving theme configuration permanently to database...";
+      configSaveErrors = [];
+
+      // Everything below is wrapped in try/catch/finally on purpose: if ANY line
+      // throws, the message above would otherwise stay frozen forever (which is
+      // exactly the "it just shows Saving... and never changes" symptom) because
+      // nothing was catching the rejected promise from this async handler.
+      try {
+        const logoText = $("#cfgLogoText").value;
+        const logoUrl = $("#cfgLogoUrl").value;
+        const accent = $("#cfgAccent").value;
+        const accent2 = $("#cfgAccent2").value;
+        const heroTitle = $("#cfgHeroTitle").value;
+        const heroSubtitle = $("#cfgHeroSubtitle").value;
+        const bgImg = $("#cfgBgImage").value;
+
+        applyTheme(accent, accent2);
+        cacheTheme({ accent, accent2, bg_image: bgImg });
+        if (bgImg) document.documentElement.style.setProperty("--bg-image", `url('${bgImg}')`);
+
+        if (logoText) setBrandText(logoText);
+        if (logoUrl) setBrandImage(logoUrl);
+
+        if (heroTitle) $("#heroTitleDisplay").textContent = heroTitle;
+        if (heroSubtitle) $("#heroSubtitleDisplay").textContent = heroSubtitle;
+
+        // Persist config keys using UPSERT logic
+        const results = await Promise.all([
+          saveConfigKey("logo_text", logoText),
+          saveConfigKey("accent", accent),
+          saveConfigKey("accent2", accent2),
+          saveConfigKey("hero_title", heroTitle),
+          saveConfigKey("hero_subtitle", heroSubtitle),
+          bgImg ? saveConfigKey("bg_image", bgImg) : true,
+          logoUrl ? saveConfigKey("logo_url", logoUrl) : true
+        ]);
+
+        if (!db.isReady()) {
+          msg.textContent = "Applied here only — Supabase isn't configured, so nothing is saved permanently.";
+        } else if (results.every(Boolean)) {
+          msg.textContent = "Site theme, colors & background updated live and saved permanently! ✓";
+        } else {
+          msg.textContent = "Applied here, but the database refused the save: " + configSaveErrors.join(" | ");
+          console.error("Config save errors:", configSaveErrors);
+        }
+      } catch (err) {
+        console.error("Site Configurator save crashed:", err);
+        msg.textContent = "Something went wrong before the save could run: " + (err && err.message ? err.message : err) + " (full details in the browser console — press F12).";
+      }
+    });
+
+    /* =====================================================================
+       12. SCROLL REVEAL OBSERVER
+       ===================================================================== */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add("in");
+      });
+    }, { threshold: 0.12 });
+
+    $$(".card, .tribute-card, .achieve-card").forEach(el => {
+      el.classList.add("rv");
+      observer.observe(el);
+    });
+
+    // Boot App
+    renderNav();
+    showPage((() => { try { return location.hash.slice(1); } catch (e) { return ""; } })() || "web-home");
+    const themeReady = loadSavedThemeConfig().catch(() => {});
+    const membersReady = loadMembers().catch(() => {});
+    // intro starts once the saved theme + member photos are in (max 2s wait)
+    runIntro(Promise.race([Promise.all([themeReady, membersReady]), new Promise(r => setTimeout(r, 2000))]));
+    loadAchievements();
+    loadGuestbook();
+    loadHomeFeatures();
+  </script>
+
+</body>
+</html>
