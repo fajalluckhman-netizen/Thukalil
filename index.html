@@ -586,12 +586,16 @@
     /* a little leaf where each branch meets its parent */
     .ftree ul ul > li > .couple::before { content:''; position:absolute; top:-8px; left:50%; width:12px; height:12px; margin-left:-6px; border-radius:0 100% 0 100%; background:linear-gradient(135deg,rgb(var(--leaf-rgb)),var(--accent)); transform:rotate(-10deg); box-shadow:0 0 8px rgba(var(--accent-rgb),.5); }
 
-    .couple { display:flex; align-items:center; gap:2px; padding:12px 14px; border-radius:30px; position:relative;
-      background:linear-gradient(180deg, rgba(var(--deep-rgb),.65), rgba(var(--deep-rgb),.25)); border:1px solid var(--line); }
-    .couple .knot { width:26px; height:26px; flex:none; }
+    /* Each person in a couple now gets their own distinct box (see .fnode
+       below); .couple just spaces those boxes apart and no longer wraps
+       them in one shared pill, so a spouse never reads as merged into the
+       person next to them -- the .knot connector below is the visible
+       line that joins the two separate boxes together instead. */
+    .couple { display:flex; align-items:center; gap:22px; padding:6px; border-radius:20px; position:relative; }
+    .couple .knot { width:46px; height:18px; flex:none; overflow:visible; }
 
-    .fnode { background:none; border:0; color:inherit; cursor:pointer; width:96px; display:flex; flex-direction:column; align-items:center; gap:6px; padding:2px; transition:transform .25s, opacity .25s, filter .25s; }
-    .fnode:hover { transform:translateY(-3px) scale(1.05); }
+    .fnode { background:linear-gradient(180deg, rgba(var(--deep-rgb),.65), rgba(var(--deep-rgb),.25)); border:1px solid var(--line); border-radius:18px; color:inherit; cursor:pointer; width:104px; display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 8px 10px; transition:transform .25s, opacity .25s, filter .25s, box-shadow .25s; box-shadow:0 2px 10px rgba(0,0,0,.18); }
+    .fnode:hover { transform:translateY(-3px) scale(1.05); box-shadow:0 6px 18px rgba(0,0,0,.3); }
     .fring { position:relative; width:70px; height:70px; border-radius:50%; padding:3px; display:block;
       background:conic-gradient(from 200deg, var(--accent), var(--accent2), rgb(var(--leaf-rgb)), var(--accent)); box-shadow:0 0 16px rgba(var(--accent-rgb),.25); }
     .fring img, .fring .finit { position:absolute; inset:3px; width:calc(100% - 6px); height:calc(100% - 6px); border-radius:50%; object-fit:cover; background:#0f161e; }
@@ -906,6 +910,25 @@
                 <label>Bio / Personal Summary</label>
                 <textarea name="bio" id="myInfoBio" rows="4"></textarea>
               </div>
+
+              <div class="form-group">
+                <label>Spouse / Partner (optional)</label>
+                <input id="myInfoSpouse" list="kinNames" autocomplete="off" placeholder="Full name of your husband/wife, if registered">
+              </div>
+              <div class="form-group">
+                <label>Sibling Of (optional)</label>
+                <input id="myInfoSiblingOf" list="kinNames" autocomplete="off" placeholder="A brother/sister already registered">
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                  <label>Father-in-law's Name (optional)</label>
+                  <input id="myInfoFatherInLaw" list="kinNames" autocomplete="off">
+                </div>
+                <div class="form-group">
+                  <label>Mother-in-law's Name (optional)</label>
+                  <input id="myInfoMotherInLaw" list="kinNames" autocomplete="off">
+                </div>
+              </div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div class="form-group">
                   <label>Date of Birth (optional)</label>
@@ -1062,19 +1085,45 @@
               <input name="name" placeholder="e.g. Alexander Thukalil" required>
             </div>
 
+            <p class="muted" style="font-size:13px; margin-bottom:10px;">
+              How does this person connect to the tree? Fill in whichever ONE of <strong>Parents</strong>, <strong>Spouse</strong>, or <strong>Sibling Of</strong> applies below — you don't need to fill in all three, and you never need to repeat information someone else already registered.
+            </p>
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
               <div class="form-group">
-                <label>Father's Name *</label>
-                <input name="father_name" id="regFather" list="kinNames" autocomplete="off" placeholder="Father's full name" required>
+                <label>Father's Name (biological, optional)</label>
+                <input name="father_name" id="regFather" list="kinNames" autocomplete="off" placeholder="Father's full name">
               </div>
               <div class="form-group">
-                <label>Mother's Name *</label>
-                <input name="mother_name" id="regMother" list="kinNames" autocomplete="off" placeholder="Mother's full name" required>
+                <label>Mother's Name (biological, optional)</label>
+                <input name="mother_name" id="regMother" list="kinNames" autocomplete="off" placeholder="Mother's full name">
               </div>
             </div>
 
             <datalist id="kinNames"></datalist>
             <div class="kin-hint" id="kinHint"></div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label>Father-in-law's Name (optional)</label>
+                <input name="father_in_law_name" list="kinNames" autocomplete="off" placeholder="Your spouse's father">
+              </div>
+              <div class="form-group">
+                <label>Mother-in-law's Name (optional)</label>
+                <input name="mother_in_law_name" list="kinNames" autocomplete="off" placeholder="Your spouse's mother">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Spouse / Partner (optional)</label>
+              <input name="spouse_name" id="regSpouse" list="kinNames" autocomplete="off" placeholder="Full name of your husband/wife, if they're already registered">
+            </div>
+
+            <div class="form-group">
+              <label>Sibling Of (optional)</label>
+              <input name="sibling_of_name" id="regSiblingOf" list="kinNames" autocomplete="off" placeholder="A brother/sister already registered">
+              <p class="muted" style="font-size:12px; margin-top:4px;">We'll automatically use their parents — no need to re-enter Father's/Mother's Name.</p>
+            </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
               <div class="form-group">
@@ -2083,7 +2132,24 @@
        name matches someone's father/mother becomes that person's child.
        ===================================================================== */
     const FT = { zoom: 1, people: new Map(), view: "tree" };
-    const ftNorm = (s) => (s || "").toLowerCase().replace(/\s+/g, " ").trim();
+    // Used ONLY for matching who-is-who across different people's entries
+    // (never for display). Two entries that differ only by punctuation or
+    // spacing used to be treated as two different people -- e.g. one child
+    // typing "Mrs. Abdullah" and another typing "Mrs Abdullah" (no period)
+    // created two separate ghost boxes for what was meant to be the same
+    // placeholder. Stripping punctuation before comparing fixes that
+    // without changing what's actually shown on screen. Honorifics like
+    // "Mrs."/"Smt." are deliberately NOT stripped here -- doing so would
+    // make a placeholder like "Mrs. Abdullah" collide with a real person
+    // simply named "Abdullah", silently merging two different people.
+    // Match key: strip EVERYTHING except letters and digits, so differences
+    // in spacing, periods, commas, or where a space does/doesn't follow a
+    // period ("Mrs. Abdullah" vs "Mrs.Abdullah") never create two people
+    // out of one. Honorifics like "Mrs."/"Smt." are deliberately kept (not
+    // removed as words) -- stripping them would make a placeholder like
+    // "Mrs. Abdullah" collide with a real, different person named plain
+    // "Abdullah", silently merging two different people into one.
+    const ftNorm = (s) => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
     const ftEsc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const ftClean = (s) => (s || "").replace(/\s+/g, " ").trim();
 
@@ -2092,23 +2158,128 @@
       const get = (name) => {
         const k = ftNorm(name);
         if (!k) return null;
-        if (!people.has(k)) people.set(k, { key: k, name: ftClean(name), member: null, children: [], spouses: new Set(), parentKey: null, motherKey: null, spouseOf: null, search: k });
+        if (!people.has(k)) people.set(k, { key: k, name: ftClean(name), member: null, children: [], spouses: new Set(), parentKey: null, motherKey: null, spouseOf: null, virtual: false, search: k });
         return people.get(k);
       };
       const members = list.filter(m => m.status === "verified");
       members.forEach(m => { const p = get(m.name); p.member = m; p.name = ftClean(m.name); });
+
+      // Union-Find used below to group everyone who is married to each
+      // other (directly or through a shared child) so the whole group can
+      // be resolved to a single anchor, however many steps apart they are.
+      const uf = new Map();
+      const find = (k) => { if (!uf.has(k)) uf.set(k, k); let r = k; while (uf.get(r) !== r) r = uf.get(r); uf.set(k, r); return r; };
+      const pairedKeys = new Set();
+      const union = (a, b) => { pairedKeys.add(a); pairedKeys.add(b); const ra = find(a), rb = find(b); if (ra !== rb) uf.set(ra, rb); };
+
+      // Pass 1: biological parent -> child edges, from each person's own
+      // Father's Name / Mother's Name (these are the ONLY fields that ever
+      // create a parent/child edge -- in-law names never do, so a spouse's
+      // in-law info can never make them render as someone's "kid").
+      // A shared child also registers an implicit marriage between the
+      // father and mother, resolved later alongside explicit Spouse links.
       members.forEach(m => {
         const p = get(m.name), f = get(m.father_name), mo = get(m.mother_name);
-        p.search = ftNorm(m.name + " " + m.father_name + " " + m.mother_name);
+        p.search = ftNorm(m.name + " " + m.father_name + " " + m.mother_name + " " + (m.spouse_name || "") + " " + (m.sibling_of_name || ""));
         if (f && f !== p) {
           p.parentKey = f.key;
           if (!f.children.includes(p)) f.children.push(p);
-          if (mo && mo !== p && mo !== f) { f.spouses.add(mo.key); if (!mo.spouseOf) mo.spouseOf = f.key; p.motherKey = mo.key; }
-        } else if (mo && mo !== p) {
-          p.parentKey = mo.key; p.motherKey = mo.key;
+        }
+        if (mo && mo !== p && mo !== f) {
+          p.motherKey = mo.key;
+          if (!p.parentKey) p.parentKey = mo.key;
           if (!mo.children.includes(p)) mo.children.push(p);
         }
+        if (f && mo && f !== mo) union(f.key, mo.key);
       });
+
+      // Pass 2: "Sibling Of" fallback -- if someone didn't fill in their own
+      // parents but named a registered sibling instead, place them under
+      // that sibling's same parent so they don't have to re-type the same
+      // Father's/Mother's Name that their sibling already provided. Run to
+      // a fixpoint so chains (A sibling-of B, B sibling-of C) resolve too,
+      // not just a direct link to someone who already has parents.
+      const siblingOnly = members.filter(m => !m.father_name && !m.mother_name && m.sibling_of_name);
+      let changed = true, guard = 0;
+      while (changed && guard++ < siblingOnly.length + 2) {
+        changed = false;
+        siblingOnly.forEach(m => {
+          const p = get(m.name);
+          if (p.parentKey) return;
+          const sib = get(m.sibling_of_name);
+          if (!sib || sib === p || !sib.parentKey) return;
+          const parent = people.get(sib.parentKey);
+          if (!parent) return;
+          p.parentKey = sib.parentKey;
+          p.motherKey = sib.motherKey;
+          if (!parent.children.includes(p)) parent.children.push(p);
+          changed = true;
+        });
+      }
+      // Anyone left (mutual/circular "sibling of" references where NEITHER
+      // side has real parent info) still deserves to show up together as
+      // siblings rather than vanishing or scattering into separate lone
+      // boxes -- group them under one shared "Unknown Parents" placeholder
+      // so the relationship is still visible and clearly labeled as such.
+      siblingOnly.forEach(m => {
+        const p = get(m.name);
+        if (p.parentKey) return;
+        const sib = get(m.sibling_of_name);
+        if (!sib || sib === p) return;
+        let vKey = sib.parentKey && people.get(sib.parentKey) && people.get(sib.parentKey).virtual ? sib.parentKey : null;
+        if (!vKey) {
+          vKey = "virtual:" + sib.key;
+          if (!people.has(vKey)) people.set(vKey, { key: vKey, name: "Unknown Parents", member: null, children: [], spouses: new Set(), parentKey: null, motherKey: null, spouseOf: null, virtual: true, search: "" });
+        }
+        const vp = people.get(vKey);
+        [p, sib].forEach(person => {
+          if (person.parentKey) return;
+          person.parentKey = vKey;
+          if (!vp.children.includes(person)) vp.children.push(person);
+        });
+      });
+
+      // Pass 3: explicit Spouse links, unioned alongside the implicit ones
+      // from Pass 1 so a chain of remarriages/shared-children resolves as
+      // one group instead of several disconnected pairs.
+      members.forEach(m => {
+        if (!m.spouse_name) return;
+        const p = get(m.name), sp = get(m.spouse_name);
+        if (!sp || sp === p) return;
+        union(p.key, sp.key);
+      });
+
+      // Resolve every marriage group (size 2+) found above to a single
+      // anchor. This is deliberately independent of shared children --
+      // a married couple with no kids registered yet used to have no way
+      // to be linked at all, which is exactly what pushed people into
+      // mis-using Father's/Mother's Name to "attach" themselves to the
+      // tree, making a spouse look like a child of the person above them.
+      const groups = new Map();
+      pairedKeys.forEach(k => { const r = find(k); if (!groups.has(r)) groups.set(r, new Set()); groups.get(r).add(k); });
+      groups.forEach((keySet) => {
+        const group = [...keySet].map(k => people.get(k)).filter(Boolean);
+        if (group.length < 2) return;
+        // Prefer an anchor who is already anchored under their own birth
+        // family (so a blood descendant never gets moved out from under
+        // their parents); among those, prefer whoever has more registered
+        // children already, to minimize how much gets merged around.
+        const withParents = group.filter(g => g.parentKey);
+        const pool = withParents.length ? withParents : group;
+        const anchor = pool.reduce((best, g) => (g.children.length > best.children.length ? g : best), pool[0]);
+        group.forEach(g => {
+          if (g === anchor) return;
+          anchor.spouses.add(g.key);
+          g.spouses.add(anchor.key);
+          if (g.spouseOf) return; // already folded into this or another anchor
+          g.spouseOf = anchor.key;
+          // Copy (not move) their children into the anchor's branch so kids
+          // who only named this parent still render in the tree -- their
+          // own profile keeps its full sibling/children info untouched.
+          g.children.forEach(c => { if (!anchor.children.includes(c)) anchor.children.push(c); });
+        });
+      });
+
       const roots = [...people.values()].filter(p => !p.parentKey && !p.spouseOf);
       return { people, roots };
     }
@@ -2116,7 +2287,11 @@
     function ftNode(p, extra) {
       const m = p.member, init = ftEsc(p.name.charAt(0).toUpperCase() || "?");
       const years = m ? formatLifeYears(m) : "";
-      const sub = m ? (years || m.branch || m.home_region || "") : "Not registered yet";
+      let sub = p.virtual ? "Linking siblings together" : (m ? (years || m.branch || m.home_region || "") : "Not registered yet");
+      // A spouse box that has no birth-family link of their own in this
+      // tree joined the family purely by marriage -- label it clearly so
+      // it never reads as if it belongs to the person above it.
+      if (extra && extra.indexOf("spouse") !== -1 && !p.parentKey) sub = sub ? `Married in · ${sub}` : "Married into the family";
       const badge = p.children.length ? `<span class="fbadge" title="${p.children.length} child(ren)">${p.children.length}</span>` : "";
       const img = m && m.photo_url ? `<img src="${ftEsc(m.photo_url)}" alt="" loading="lazy" onerror="this.style.display='none'">` : "";
       const deceasedCls = m && m.is_deceased ? "deceased" : "";
@@ -2126,14 +2301,28 @@
         <span class="fname">${ftEsc(p.name)}</span><span class="fsub">${ftEsc(sub)}</span></button>`;
     }
 
-    const FT_KNOT = `<svg class="knot" viewBox="0 0 26 26" fill="none" aria-hidden="true"><circle cx="9.5" cy="13" r="6" style="stroke:var(--accent)" stroke-width="2"/><circle cx="16.5" cy="13" r="6" style="stroke:var(--accent2)" stroke-width="2"/></svg>`;
+    // A visible line spanning the full connector, with the little interlocking
+    // rings centered on it -- this is what visibly joins two separate spouse
+    // boxes together, instead of the boxes looking merged into one pill.
+    const FT_KNOT = `<svg class="knot" viewBox="0 0 66 26" fill="none" aria-hidden="true">
+      <line x1="0" y1="13" x2="66" y2="13" style="stroke:rgba(var(--accent-rgb),.6)" stroke-width="2"/>
+      <circle cx="29.5" cy="13" r="6" style="stroke:var(--accent); fill:rgb(var(--deep-rgb))" stroke-width="2"/>
+      <circle cx="36.5" cy="13" r="6" style="stroke:var(--accent2); fill:rgb(var(--deep-rgb))" stroke-width="2"/>
+    </svg>`;
 
     function ftBranch(p, seen) {
       if (seen.has(p.key)) return "";
       seen.add(p.key);
-      const spouses = [...p.spouses].map(k => FT.people.get(k)).filter(Boolean);
+      // A spouse is always drawn as a badge next to their anchor (below),
+      // never walked as a separate node -- marking them seen here stops
+      // them from ever being drawn a second time anywhere else in the tree.
+      const spouses = [...p.spouses].map(k => FT.people.get(k)).filter(s => s && !seen.has(s.key));
+      spouses.forEach(s => seen.add(s.key));
       const couple = ftNode(p) + spouses.map(s => FT_KNOT + ftNode(s, "spouse")).join("");
-      const kids = p.children.filter(c => !seen.has(c.key)).map(c => ftBranch(c, seen)).join("");
+      // A child who is themselves folded into someone else's branch as a
+      // spouse (c.spouseOf) renders there instead -- skipping them here
+      // keeps that one person from appearing twice in two different boxes.
+      const kids = p.children.filter(c => !seen.has(c.key) && !c.spouseOf).map(c => ftBranch(c, seen)).join("");
       return `<li><div class="couple">${couple}</div>${kids ? `<ul>${kids}</ul>` : ""}</li>`;
     }
 
@@ -2153,8 +2342,10 @@
         const count = [...seen].filter(k => people.get(k).member).length;
         return { r, html, count };
       });
-      // anything unreached (e.g. circular entries) still gets shown
-      [...people.values()].filter(p => !seen.has(p.key) && !(p.spouseOf && !p.member)).forEach(p => {
+      // anything unreached (e.g. circular entries) still gets shown -- a
+      // folded spouse (p.spouseOf) is excluded no matter what, since they
+      // always belong inline next to their anchor, never as their own house.
+      [...people.values()].filter(p => !seen.has(p.key) && !p.spouseOf).forEach(p => {
         if (seen.has(p.key)) return;
         houses.push({ r: p, html: ftBranch(p, seen), count: 0 });
       });
@@ -2166,7 +2357,7 @@
           <div class="fhouse-trunk"></div>
           <div class="ftree"><ul>${h.html}</ul></div>
         </div>`).join("");
-      $("#kinNames").innerHTML = [...people.values()].map(p => `<option value="${ftEsc(p.name)}">`).join("");
+      $("#kinNames").innerHTML = [...people.values()].filter(p => !p.virtual).map(p => `<option value="${ftEsc(p.name)}">`).join("");
       applyMemberSearch($("#memberSearch").value);
       applyTreeZoom();
     }
@@ -2235,6 +2426,7 @@
         ${m ? renderBusinessBlock(m) : ""}
         ${m ? renderSocialLinks(m.social_links) : ""}
         ${rel("Parents", m ? [fatherName ? (father ? link(father) : `<span class="kin-plain">${ftEsc(fatherName)}</span>`) : "", motherName ? (mother ? link(mother) : `<span class="kin-plain">${ftEsc(motherName)}</span>`) : ""].filter(Boolean) : [])}
+        ${rel("In-Laws", m ? [m.father_in_law_name ? `<span class="kin-plain">${ftEsc(m.father_in_law_name)}</span>` : "", m.mother_in_law_name ? `<span class="kin-plain">${ftEsc(m.mother_in_law_name)}</span>` : ""].filter(Boolean) : [])}
         ${rel("Brothers & Sisters", sibs.map(link))}
         ${rel(husband ? "Married to" : "Spouse", (husband ? [husband] : spouses).map(link))}
         ${rel("Children", p.children.map(link))}`;
@@ -2547,8 +2739,12 @@
 
       const newMember = {
         name: fd.get("name"),
-        father_name: fd.get("father_name"),
-        mother_name: fd.get("mother_name"),
+        father_name: fd.get("father_name") || "",
+        mother_name: fd.get("mother_name") || "",
+        father_in_law_name: fd.get("father_in_law_name") || "",
+        mother_in_law_name: fd.get("mother_in_law_name") || "",
+        spouse_name: fd.get("spouse_name") || "",
+        sibling_of_name: fd.get("sibling_of_name") || "",
         password: isDeceased ? null : (fd.get("password") || null),
         photo_url: fd.get("photo_url") || null,
         branch: fd.get("branch") || "",
@@ -2672,6 +2868,10 @@
       $("#myInfoDob").value = loggedInUser.date_of_birth || "";
       $("#myInfoMobile").value = loggedInUser.mobile_number || "";
       $("#myInfoEmail").value = loggedInUser.email || "";
+      $("#myInfoSpouse").value = loggedInUser.spouse_name || "";
+      $("#myInfoSiblingOf").value = loggedInUser.sibling_of_name || "";
+      $("#myInfoFatherInLaw").value = loggedInUser.father_in_law_name || "";
+      $("#myInfoMotherInLaw").value = loggedInUser.mother_in_law_name || "";
 
       const hasBiz = !!loggedInUser.has_business;
       $("#myInfoHasBusiness").checked = hasBiz;
@@ -2709,6 +2909,10 @@
         date_of_birth: $("#myInfoDob").value || null,
         mobile_number: $("#myInfoMobile").value,
         email: $("#myInfoEmail").value,
+        spouse_name: $("#myInfoSpouse").value,
+        sibling_of_name: $("#myInfoSiblingOf").value,
+        father_in_law_name: $("#myInfoFatherInLaw").value,
+        mother_in_law_name: $("#myInfoMotherInLaw").value,
         has_business: hasBiz,
         business_name: hasBiz ? $("#myInfoBusinessName").value : "",
         business_origin: hasBiz ? $("#myInfoBusinessOrigin").value : "",
@@ -2861,7 +3065,10 @@
           <img src="${m.photo_url || ''}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px;" onerror="this.src='https://placehold.co/300x160/0f161e/d4af37?text=Applicant'">
           <h3 style="margin: 0; font-size: 20px;">${m.name}</h3>
           ${formatLifeYears(m) ? `<div style="font-size:12px; color:var(--muted); margin-top:-6px;">${formatLifeYears(m)}</div>` : ''}
-          <p style="font-size: 13px;"><strong>Father:</strong> ${m.father_name}<br><strong>Mother:</strong> ${m.mother_name}</p>
+          <p style="font-size: 13px;"><strong>Father:</strong> ${m.father_name || '—'}<br><strong>Mother:</strong> ${m.mother_name || '—'}</p>
+          ${m.spouse_name ? `<p style="font-size: 12px; color: var(--muted);"><strong>Spouse:</strong> ${m.spouse_name}</p>` : ''}
+          ${m.sibling_of_name ? `<p style="font-size: 12px; color: var(--muted);"><strong>Sibling of:</strong> ${m.sibling_of_name}</p>` : ''}
+          ${(m.father_in_law_name || m.mother_in_law_name) ? `<p style="font-size: 12px; color: var(--muted);"><strong>In-laws:</strong> ${[m.father_in_law_name, m.mother_in_law_name].filter(Boolean).join(', ')}</p>` : ''}
           ${m.home_region ? `<p style="font-size: 12px; color: var(--accent);">🌍 ${m.home_region}</p>` : ''}
           ${m.hobbies ? `<p style="font-size: 12px; color: var(--muted);"><strong>Hobbies:</strong> ${m.hobbies}</p>` : ''}
           ${m.has_business && m.business_name ? `<p style="font-size: 12px; color: var(--accent2);">💼 ${m.business_name}</p>` : ''}
