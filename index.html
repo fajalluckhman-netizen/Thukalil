@@ -604,6 +604,8 @@
     .fnode.ghost .fname { color:var(--muted); font-weight:600; }
     .fnode.hit .fring { box-shadow:0 0 0 4px rgba(var(--accent2-rgb),.35), 0 0 26px var(--accent); }
     .fnode.dim { opacity:.25; filter:grayscale(.7); }
+    .fnode.deceased .fring { filter:grayscale(.55) sepia(.3); background:conic-gradient(from 200deg, var(--muted), var(--accent2), var(--muted)); }
+    .fnode.deceased .fname { color:var(--accent2); font-style:italic; }
 
     .kin-modal { position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.7); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; padding:20px; }
     .kin-modal.open { display:flex; }
@@ -664,16 +666,40 @@
         <div class="grid">
           <div class="card">
             <div class="big" id="cntMembers">0</div>
-            <p style="margin-top:10px">Verified family lineage members</p>
+            <p style="margin-top:10px">Living family lineage members</p>
           </div>
           <div class="card">
-            <div class="big">100+</div>
-            <p style="margin-top:10px">Years of preserved lineage & history</p>
+            <div class="big" id="cntRegions">0</div>
+            <p style="margin-top:10px">Regions & countries the family calls home</p>
           </div>
           <div class="card">
             <div class="big" id="cntTributes">0</div>
             <p style="margin-top:10px">Tributes recorded in our family guestbook</p>
           </div>
+          <div class="card">
+            <div class="big" id="cntMemorial">0</div>
+            <p style="margin-top:10px">Ancestors honored in loving memory</p>
+          </div>
+        </div>
+
+        <!-- FAMILY AROUND THE WORLD -->
+        <span class="tag" style="margin-top:12vh">Our Global Family</span>
+        <h2>Family Around the World</h2>
+        <p class="muted" style="max-width:640px; margin-bottom:12px;">
+          Where the Thukalil name has taken root, by home region.
+        </p>
+        <div class="grid" id="regionGrid" style="margin-top:20px;">
+          <!-- Dynamically populated from each member's Home Region -->
+        </div>
+
+        <!-- IN LOVING MEMORY — MEMORIAL WALL -->
+        <span class="tag" style="margin-top:12vh">Honoring Those Who Came Before</span>
+        <h2>In Loving Memory</h2>
+        <p class="muted" style="max-width:640px; margin-bottom: 24px;">
+          A memorial wall for the ancestors and relatives who shaped this family's story. Their branch in the tree, and their place in our memory, stays forever.
+        </p>
+        <div class="grid" id="memorialWallGrid">
+          <!-- Dynamically populated: every verified member marked "In Loving Memory" -->
         </div>
 
         <!-- FEATURED ACHIEVEMENTS SECTION -->
@@ -862,13 +888,64 @@
                 <input type="hidden" name="photo_url" id="myInfoPhoto" required>
                 <img id="myInfoPhotoPrev" class="file-preview" alt="Profile Preview">
               </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                  <label>Home Region / Country *</label>
+                  <input name="home_region" id="myInfoHomeRegion" required>
+                </div>
+                <div class="form-group">
+                  <label>Family Branch / Location</label>
+                  <input name="branch" id="myInfoBranch">
+                </div>
+              </div>
               <div class="form-group">
-                <label>Family Branch / Location</label>
-                <input name="branch" id="myInfoBranch">
+                <label>Hobbies & Interests *</label>
+                <input name="hobbies" id="myInfoHobbies" required>
               </div>
               <div class="form-group">
                 <label>Bio / Personal Summary</label>
                 <textarea name="bio" id="myInfoBio" rows="4"></textarea>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                  <label>Date of Birth (optional)</label>
+                  <input type="date" id="myInfoDob">
+                </div>
+                <div class="form-group">
+                  <label>Mobile Number (optional)</label>
+                  <input type="tel" id="myInfoMobile">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Email (optional)</label>
+                <input type="email" id="myInfoEmail">
+              </div>
+
+              <div class="form-group">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; text-transform:none; letter-spacing:0; font-size:15px;">
+                  <input type="checkbox" id="myInfoHasBusiness" style="width:18px; height:18px; padding:0; flex:none;" onchange="toggleMyInfoBusinessFields(this.checked)">
+                  I run a business or company
+                </label>
+              </div>
+              <div id="myInfoBusinessFields" style="display:none;">
+                <div class="form-group">
+                  <label>Business Name</label>
+                  <input id="myInfoBusinessName">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div class="form-group">
+                    <label>Business Origin / Location</label>
+                    <input id="myInfoBusinessOrigin">
+                  </div>
+                  <div class="form-group">
+                    <label>Industry</label>
+                    <input id="myInfoBusinessIndustry">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Business Details</label>
+                  <textarea id="myInfoBusinessDetails" rows="3"></textarea>
+                </div>
               </div>
 
               <div class="form-group">
@@ -966,11 +1043,25 @@
         <!-- REGISTER FORM -->
         <div id="authRegBox">
           <form id="regForm">
+
+            <!-- LIVING vs IN LOVING MEMORY TOGGLE -->
+            <div class="form-group">
+              <label>Is this person living, or are you adding them in loving memory? *</label>
+            </div>
+            <div class="seg" style="margin-bottom: 20px;">
+              <button type="button" id="regToggleAlive" class="on" onclick="setRegLifeStatus(false)">🌿 Living Member</button>
+              <button type="button" id="regToggleDeceased" onclick="setRegLifeStatus(true)">🕊️ In Loving Memory</button>
+            </div>
+            <p class="muted" id="regLifeStatusNote" style="margin-top:-10px; margin-bottom:20px; font-size:13px;">
+              Registering yourself or another living relative. They'll be able to log in and manage their own profile once verified.
+            </p>
+            <input type="hidden" id="regIsDeceased" value="false">
+
             <div class="form-group">
               <label>Full Name *</label>
               <input name="name" placeholder="e.g. Alexander Thukalil" required>
             </div>
-            
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
               <div class="form-group">
                 <label>Father's Name *</label>
@@ -985,26 +1076,90 @@
             <datalist id="kinNames"></datalist>
             <div class="kin-hint" id="kinHint"></div>
 
-            <div class="form-group">
-              <label>Create Account Password *</label>
-              <input type="password" name="password" placeholder="Create a secure password" required>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label>Date of Birth (optional)</label>
+                <input type="date" name="date_of_birth" id="regDob">
+              </div>
+              <div class="form-group" id="regDopWrap" style="display:none;">
+                <label>Date of Passing</label>
+                <input type="date" name="date_of_passing" id="regDop">
+              </div>
             </div>
 
+            <div class="form-group" id="regPasswordWrap">
+              <label>Create Account Password *</label>
+              <input type="password" name="password" id="regPasswordInput" placeholder="Create a secure password" required>
+            </div>
+            <p class="muted" id="regPasswordNote" style="display:none; margin-top:-10px; margin-bottom:16px; font-size:13px;">
+              No password needed — a memorial profile doesn't log in. The family council can still manage this profile from the Admin Panel.
+            </p>
+
             <div class="form-group">
-              <label>Photo (Select File from PC) *</label>
+              <label id="regPhotoLabel">Photo (Select File from PC) *</label>
               <input type="file" id="regPhotoFile" accept="image/*" style="padding: 10px;" required>
               <input type="hidden" name="photo_url" id="regPhotoUrl">
               <img id="regPhotoPrev" class="file-preview" alt="Registration Photo Preview">
             </div>
 
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label>Home Region / Country *</label>
+                <input name="home_region" id="regHomeRegion" placeholder="e.g. Kerala, India / Dubai, UAE" required>
+              </div>
+              <div class="form-group">
+                <label>Family Branch / Location</label>
+                <input name="branch" placeholder="e.g. Kerala Central, UK Branch...">
+              </div>
+            </div>
+
             <div class="form-group">
-              <label>Family Branch / Location</label>
-              <input name="branch" placeholder="e.g. Kerala, USA, Dubai, UK...">
+              <label>Hobbies & Interests *</label>
+              <input name="hobbies" id="regHobbies" placeholder="e.g. Cricket, Cooking, Photography, Chess" required>
             </div>
 
             <div class="form-group">
               <label>About You / Bio / Description</label>
               <textarea name="bio" rows="4" placeholder="Share a short bio, profession, or family memory..."></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label>Mobile Number (optional)</label>
+                <input type="tel" name="mobile_number" placeholder="+971 50 123 4567">
+              </div>
+              <div class="form-group">
+                <label>Email (optional)</label>
+                <input type="email" name="email" placeholder="name@example.com">
+              </div>
+            </div>
+
+            <!-- BUSINESS (LIVING MEMBERS ONLY) -->
+            <div class="form-group" id="regBusinessToggleWrap">
+              <label style="display:flex; align-items:center; gap:10px; cursor:pointer; text-transform:none; letter-spacing:0; font-size:15px;">
+                <input type="checkbox" id="regHasBusiness" style="width:18px; height:18px; padding:0; flex:none;" onchange="toggleBusinessFields(this.checked)">
+                I run a business or company (optional)
+              </label>
+            </div>
+            <div id="regBusinessFields" style="display:none;">
+              <div class="form-group">
+                <label>Business Name</label>
+                <input name="business_name" placeholder="e.g. Thukalil Spices & Trading">
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                  <label>Business Origin / Location</label>
+                  <input name="business_origin" placeholder="e.g. Kochi, Kerala">
+                </div>
+                <div class="form-group">
+                  <label>Industry</label>
+                  <input name="business_industry" placeholder="e.g. Export, Retail, Hospitality">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Business Details</label>
+                <textarea name="business_details" rows="3" placeholder="What the business does, since when, website..."></textarea>
+              </div>
             </div>
 
             <div class="form-group">
@@ -1013,31 +1168,31 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
               <div class="form-group">
                 <label>Instagram</label>
-                <input name="social_instagram" placeholder="https://instagram.com/username">
+                <input name="social_instagram" placeholder="instagram.com/username or @username">
               </div>
               <div class="form-group">
                 <label>Facebook</label>
-                <input name="social_facebook" placeholder="https://facebook.com/username">
+                <input name="social_facebook" placeholder="facebook.com/username">
               </div>
               <div class="form-group">
                 <label>LinkedIn</label>
-                <input name="social_linkedin" placeholder="https://linkedin.com/in/username">
+                <input name="social_linkedin" placeholder="linkedin.com/in/username">
               </div>
               <div class="form-group">
                 <label>X / Twitter</label>
-                <input name="social_x" placeholder="https://x.com/username">
+                <input name="social_x" placeholder="x.com/username or @username">
               </div>
               <div class="form-group">
                 <label>YouTube</label>
-                <input name="social_youtube" placeholder="https://youtube.com/@channel">
+                <input name="social_youtube" placeholder="youtube.com/@channel">
               </div>
               <div class="form-group">
                 <label>Website</label>
-                <input name="social_website" placeholder="https://yourwebsite.com">
+                <input name="social_website" placeholder="yourwebsite.com">
               </div>
             </div>
 
-            <button class="btn" type="submit">Submit for Lineage Verification</button>
+            <button class="btn" type="submit" id="regSubmitBtn">Submit for Lineage Verification</button>
             <div class="msg" id="regMsg"></div>
           </form>
         </div>
@@ -1765,12 +1920,13 @@
        5. DATA MANAGEMENT & LOCAL FALLBACKS
        ===================================================================== */
     const MOCK_MEMBERS = [
-      { id: "1", name: "Abraham Thukalil", father_name: "Joseph Thukalil", mother_name: "Mariam Thukalil", photo_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400", bio: "Senior patriarch, dedicated to community welfare and family lineage.", branch: "Kerala Central", password: "123", status: "verified" },
-      { id: "2", name: "Dr. Evelyn Thukalil", father_name: "Abraham Thukalil", mother_name: "Grace Thukalil", photo_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400", bio: "Cardiologist & researcher based in London.", branch: "UK Branch", password: "123", status: "verified" },
-      { id: "3", name: "Mathew Thukalil", father_name: "Thomas Thukalil", mother_name: "Anna Thukalil", photo_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400", bio: "Architect & urban heritage designer.", branch: "Dubai Chapter", password: "123", status: "verified" },
-      { id: "4", name: "Daniel Thukalil", father_name: "abraham thukalil", mother_name: "GRACE THUKALIL", photo_url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400", bio: "Engineer, keeps the family home in Kerala.", branch: "Kerala Central", password: "123", status: "verified" },
-      { id: "5", name: "Philip Thukalil", father_name: "Joseph Thukalil", mother_name: "Mariam Thukalil", photo_url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400", bio: "Younger brother of Abraham.", branch: "Kerala North", password: "123", status: "verified" },
-      { id: "6", name: "Noah Thukalil", father_name: "Daniel Thukalil", mother_name: "Priya Thukalil", photo_url: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400", bio: "Youngest of the family.", branch: "Kerala Central", password: "123", status: "verified" }
+      { id: "0", name: "Joseph Thukalil", father_name: "", mother_name: "", photo_url: "", bio: "Founder of the Thukalil household in Kerala. Remembered for his quiet generosity.", branch: "Kerala Central", home_region: "Kerala, India", hobbies: "Farming, Storytelling", password: null, status: "verified", is_deceased: true, date_of_birth: "1928-03-02", date_of_passing: "1999-11-04" },
+      { id: "1", name: "Abraham Thukalil", father_name: "Joseph Thukalil", mother_name: "Mariam Thukalil", photo_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400", bio: "Senior patriarch, dedicated to community welfare and family lineage.", branch: "Kerala Central", home_region: "Kerala, India", hobbies: "Gardening, Chess, Reading", password: "123", status: "verified", is_deceased: false, has_business: true, business_name: "Thukalil Spices & Trading", business_origin: "Kochi, Kerala", business_industry: "Export", social_links: { instagram: "https://instagram.com/abraham.thukalil" } },
+      { id: "2", name: "Dr. Evelyn Thukalil", father_name: "Abraham Thukalil", mother_name: "Grace Thukalil", photo_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400", bio: "Cardiologist & researcher based in London.", branch: "UK Branch", home_region: "London, UK", hobbies: "Running, Classical Music", password: "123", status: "verified", is_deceased: false },
+      { id: "3", name: "Mathew Thukalil", father_name: "Thomas Thukalil", mother_name: "Anna Thukalil", photo_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400", bio: "Architect & urban heritage designer.", branch: "Dubai Chapter", home_region: "Dubai, UAE", hobbies: "Sketching, Travel", password: "123", status: "verified", is_deceased: false },
+      { id: "4", name: "Daniel Thukalil", father_name: "abraham thukalil", mother_name: "GRACE THUKALIL", photo_url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400", bio: "Engineer, keeps the family home in Kerala.", branch: "Kerala Central", home_region: "Kerala, India", hobbies: "Cricket, Woodworking", password: "123", status: "verified", is_deceased: false },
+      { id: "5", name: "Philip Thukalil", father_name: "Joseph Thukalil", mother_name: "Mariam Thukalil", photo_url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400", bio: "Younger brother of Abraham.", branch: "Kerala North", home_region: "Kerala, India", hobbies: "Fishing", password: "123", status: "verified", is_deceased: false },
+      { id: "6", name: "Noah Thukalil", father_name: "Daniel Thukalil", mother_name: "Priya Thukalil", photo_url: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400", bio: "Youngest of the family.", branch: "Kerala Central", home_region: "Kerala, India", hobbies: "Gaming, Football", password: "123", status: "verified", is_deceased: false }
     ];
 
     const MOCK_GUESTBOOK = [
@@ -1794,11 +1950,13 @@
       }
       renderMembersGrid(currentMembers);
       renderFamilyTree(currentMembers);
-      $("#cntMembers").textContent = currentMembers.filter(m => m.status === 'verified').length;
+      const verifiedAll = currentMembers.filter(m => m.status === 'verified');
+      $("#cntMembers").textContent = verifiedAll.filter(m => !m.is_deceased).length;
+      if ($("#cntMemorial")) $("#cntMemorial").textContent = verifiedAll.filter(m => m.is_deceased).length;
+      if ($("#cntRegions")) $("#cntRegions").textContent = new Set(verifiedAll.map(m => (m.home_region || "").trim().toLowerCase()).filter(Boolean)).size;
     }
 
     // Social links are stored as a small { platform: url } object (JSONB column).
-    // Renders a row of icon links; returns "" when there's nothing to show.
     const SOCIAL_PLATFORMS = [
       { key: "instagram", label: "Instagram", icon: "📷" },
       { key: "facebook", label: "Facebook", icon: "📘" },
@@ -1807,16 +1965,80 @@
       { key: "youtube", label: "YouTube", icon: "▶" },
       { key: "website", label: "Website", icon: "🔗" }
     ];
+    const SOCIAL_BASE = {
+      instagram: "https://instagram.com/",
+      facebook: "https://facebook.com/",
+      linkedin: "https://linkedin.com/in/",
+      x: "https://x.com/",
+      youtube: "https://youtube.com/",
+      website: ""
+    };
+    // Turns whatever a member typed (a bare handle, "@username", a domain
+    // with no protocol, or a full URL) into a real absolute URL. This is
+    // the actual fix for links "not redirecting properly": a stored value
+    // like "instagram.com/username" with no "https://" is a RELATIVE link,
+    // so clicking it just appended to the site's own current URL instead
+    // of navigating away.
+    function normalizeSocialUrl(platform, raw) {
+      let v = (raw || "").trim();
+      if (!v) return "";
+      if (/^https?:\/\//i.test(v)) return v;
+      if (platform === "youtube") {
+        if (v.startsWith("@")) return SOCIAL_BASE.youtube + v;
+        if (v.includes("youtube.com") || v.includes("youtu.be")) return "https://" + v.replace(/^\/+/, "");
+        return SOCIAL_BASE.youtube + "@" + v.replace(/^@/, "");
+      }
+      if (v.startsWith("@")) return (SOCIAL_BASE[platform] || "https://") + v.slice(1);
+      if (v.includes(".") || v.includes("/")) return "https://" + v.replace(/^\/+/, "");
+      return SOCIAL_BASE[platform] ? SOCIAL_BASE[platform] + v : "https://" + v;
+    }
+
+    // Renders a row of icon links; returns "" when there's nothing to show.
     function renderSocialLinks(social) {
       let obj = social || {};
       if (typeof obj === "string") { try { obj = JSON.parse(obj); } catch (e) { obj = {}; } }
-      const links = SOCIAL_PLATFORMS.filter(p => obj && obj[p.key]).map(p => `
-        <a href="${ftEsc(obj[p.key])}" target="_blank" rel="noopener noreferrer" title="${p.label}"
+      const links = SOCIAL_PLATFORMS.filter(p => obj && obj[p.key]).map(p => {
+        const url = normalizeSocialUrl(p.key, obj[p.key]);
+        return `
+        <a href="${ftEsc(url)}" target="_blank" rel="noopener noreferrer" title="${p.label}"
            style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%;
                   background:rgba(var(--accent-rgb),.12); border:1px solid var(--line); color:var(--accent2);
-                  text-decoration:none; font-size:14px; margin:0 6px 6px 0;">${p.icon}</a>
-      `).join('');
+                  text-decoration:none; font-size:14px; margin:0 6px 6px 0;">${p.icon}</a>`;
+      }).join('');
       return links ? `<div style="margin-top:10px;">${links}</div>` : '';
+    }
+
+    // Splits a free-text hobbies string into little pill chips for display.
+    function renderHobbyChips(hobbies) {
+      if (!hobbies) return '';
+      const items = String(hobbies).split(/[,•|]/).map(s => s.trim()).filter(Boolean);
+      if (!items.length) return '';
+      return `<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">${items.map(h => `
+        <span style="font-size:11px; padding:4px 10px; border-radius:99px; background:rgba(var(--accent-rgb),.1); border:1px solid var(--line); color:var(--accent2);">${ftEsc(h)}</span>
+      `).join('')}</div>`;
+    }
+
+    // "1950 – 2020" style life-years line, or "Born 1992" for the living.
+    function formatLifeYears(m) {
+      const by = m.date_of_birth ? new Date(m.date_of_birth).getFullYear() : null;
+      const dy = m.date_of_passing ? new Date(m.date_of_passing).getFullYear() : null;
+      if (m.is_deceased) {
+        if (by && dy) return `${by} – ${dy}`;
+        if (dy) return `d. ${dy}`;
+        if (by) return `b. ${by}`;
+        return '';
+      }
+      return by ? `Born ${by}` : '';
+    }
+
+    // Small business summary block used in the kin modal / card details.
+    function renderBusinessBlock(m) {
+      if (!m || !m.has_business || !m.business_name) return '';
+      const bits = [ftEsc(m.business_name)];
+      if (m.business_industry) bits.push(ftEsc(m.business_industry));
+      const line2 = m.business_origin ? `<br><span class="muted">${ftEsc(m.business_origin)}</span>` : '';
+      const details = m.business_details ? `<p class="muted" style="margin-top:4px; font-size:13px;">${ftEsc(m.business_details)}</p>` : '';
+      return `<div style="margin-top:10px; font-size:13px; color:var(--accent2);">💼 <strong>${bits.join(' · ')}</strong>${line2}${details}</div>`;
     }
 
     function renderMembersGrid(list) {
@@ -1827,23 +2049,31 @@
         return;
       }
 
-      container.innerHTML = verified.map(m => `
-        <div class="member-card rv in">
+      container.innerHTML = verified.map(m => {
+        const years = formatLifeYears(m);
+        return `
+        <div class="member-card rv in" style="${m.is_deceased ? 'filter:grayscale(.35);' : ''}">
           <div class="member-img-wrap">
-            <img src="${m.photo_url}" alt="${m.name}" onerror="this.src='https://placehold.co/400x300/0f161e/d4af37?text=Thukalil+Member'">
+            <img src="${m.photo_url || ''}" alt="${m.name}" onerror="this.src='https://placehold.co/400x300/0f161e/d4af37?text=Thukalil+Member'">
+            ${m.is_deceased ? `<div style="position:absolute; top:10px; left:10px; background:rgba(7,9,13,.75); border:1px solid var(--accent); color:var(--accent2); font-size:11px; padding:4px 10px; border-radius:99px;">🕊️ In Loving Memory</div>` : ''}
           </div>
           <div class="member-info">
             <div class="member-name">${m.name}</div>
+            ${years ? `<div style="font-size:12px; color:var(--muted); margin-top:-6px; margin-bottom:8px;">${years}</div>` : ''}
             <div class="member-parents">
               <span><strong>Father:</strong> ${m.father_name}</span><br>
               <span><strong>Mother:</strong> ${m.mother_name}</span>
             </div>
+            ${m.home_region ? `<div style="font-size: 12px; color: var(--accent); margin-bottom: 4px;">🌍 ${m.home_region}</div>` : ''}
             ${m.branch ? `<div style="font-size: 12px; color: var(--accent); margin-bottom: 8px;">📍 ${m.branch}</div>` : ''}
             <p style="font-size: 14px; color: var(--muted);">${m.bio || 'Proud member of the Thukalil lineage.'}</p>
+            ${m.has_business && m.business_name ? `<div style="font-size:13px; color:var(--accent2); margin-top:8px;">💼 ${m.business_name}${m.business_industry ? ' · ' + m.business_industry : ''}</div>` : ''}
+            ${renderHobbyChips(m.hobbies)}
             ${renderSocialLinks(m.social_links)}
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     /* =====================================================================
@@ -1885,11 +2115,14 @@
 
     function ftNode(p, extra) {
       const m = p.member, init = ftEsc(p.name.charAt(0).toUpperCase() || "?");
-      const sub = m ? (m.branch || "") : "Not registered yet";
+      const years = m ? formatLifeYears(m) : "";
+      const sub = m ? (years || m.branch || m.home_region || "") : "Not registered yet";
       const badge = p.children.length ? `<span class="fbadge" title="${p.children.length} child(ren)">${p.children.length}</span>` : "";
       const img = m && m.photo_url ? `<img src="${ftEsc(m.photo_url)}" alt="" loading="lazy" onerror="this.style.display='none'">` : "";
-      return `<button type="button" class="fnode ${m ? "" : "ghost"} ${extra || ""}" data-key="${ftEsc(p.key)}" data-s="${ftEsc(p.search)}" aria-label="${ftEsc(p.name)}">
-        <span class="fring"><span class="finit">${init}</span>${img}${badge}</span>
+      const deceasedCls = m && m.is_deceased ? "deceased" : "";
+      const dove = m && m.is_deceased ? `<span class="fbadge" title="In Loving Memory" style="right:auto; left:-4px; background:rgb(var(--deep-rgb));">🕊️</span>` : "";
+      return `<button type="button" class="fnode ${m ? "" : "ghost"} ${deceasedCls} ${extra || ""}" data-key="${ftEsc(p.key)}" data-s="${ftEsc(p.search)}" aria-label="${ftEsc(p.name)}">
+        <span class="fring"><span class="finit">${init}</span>${img}${badge}${dove}</span>
         <span class="fname">${ftEsc(p.name)}</span><span class="fsub">${ftEsc(sub)}</span></button>`;
     }
 
@@ -1989,12 +2222,17 @@
       const husband = p.spouseOf && byKey(p.spouseOf);
       const rel = (title, items) => items.length ? `<div class="kin-rel"><b>${title}</b>${items.join("")}</div>` : "";
       const photo = m && m.photo_url ? `<img class="kin-photo" src="${ftEsc(m.photo_url)}" alt="" onerror="this.style.display='none'">` : `<div class="kin-photo finit" style="display:flex;align-items:center;justify-content:center;font-size:40px;">${ftEsc(p.name.charAt(0).toUpperCase())}</div>`;
+      const years = m ? formatLifeYears(m) : "";
       $("#kinBox").innerHTML = `
         <button class="kin-close" onclick="closeKin()" aria-label="Close">×</button>
         ${photo}
+        ${m && m.is_deceased ? `<div style="display:inline-block; margin:0 auto 6px; background:rgba(var(--accent-rgb),.12); border:1px solid var(--accent); color:var(--accent2); font-size:11px; padding:4px 12px; border-radius:99px;">🕊️ In Loving Memory</div>` : ""}
         <h3>${ftEsc(p.name)}</h3>
-        <div class="muted" style="font-size:13px;">${m ? (m.branch ? "📍 " + ftEsc(m.branch) : "Registered member") : "Named as a parent — not registered yet"}</div>
+        ${years ? `<div class="muted" style="font-size:13px; margin-top:-4px;">${ftEsc(years)}</div>` : ""}
+        <div class="muted" style="font-size:13px;">${m ? [m.home_region ? "🌍 " + ftEsc(m.home_region) : "", m.branch ? "📍 " + ftEsc(m.branch) : ""].filter(Boolean).join(" · ") || "Registered member" : "Named as a parent — not registered yet"}</div>
         ${m && m.bio ? `<p class="muted" style="margin-top:12px;">${ftEsc(m.bio)}</p>` : ""}
+        ${m ? renderHobbyChips(m.hobbies) : ""}
+        ${m ? renderBusinessBlock(m) : ""}
         ${m ? renderSocialLinks(m.social_links) : ""}
         ${rel("Parents", m ? [fatherName ? (father ? link(father) : `<span class="kin-plain">${ftEsc(fatherName)}</span>`) : "", motherName ? (mother ? link(mother) : `<span class="kin-plain">${ftEsc(motherName)}</span>`) : ""].filter(Boolean) : [])}
         ${rel("Brothers & Sisters", sibs.map(link))}
@@ -2189,6 +2427,54 @@
           </div>
         `).join('');
       }
+
+      renderRegionGrid(currentMembers.filter(m => m.status === 'verified'));
+      renderMemorialWall(currentMembers.filter(m => m.status === 'verified' && m.is_deceased));
+    }
+
+    // "Family Around the World" -- counts verified members (living & passed)
+    // grouped by their Home Region, sorted biggest branch first.
+    function renderRegionGrid(verifiedMembers) {
+      const container = $("#regionGrid");
+      if (!container) return;
+      const counts = new Map();
+      verifiedMembers.forEach(m => {
+        const region = (m.home_region || "").trim();
+        if (!region) return;
+        counts.set(region, (counts.get(region) || 0) + 1);
+      });
+      if (!counts.size) {
+        container.innerHTML = `<p class="muted">No home regions recorded yet — add yours when you register!</p>`;
+        return;
+      }
+      const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+      container.innerHTML = sorted.map(([region, count]) => `
+        <div class="card" style="text-align:center;">
+          <div style="font-size:28px;">🌍</div>
+          <h3 style="margin-top:8px;">${ftEsc(region)}</h3>
+          <p class="muted">${count} family member${count === 1 ? '' : 's'}</p>
+        </div>
+      `).join('');
+    }
+
+    // The Memorial Wall -- every verified member marked "In Loving Memory".
+    function renderMemorialWall(deceasedMembers) {
+      const container = $("#memorialWallGrid");
+      if (!container) return;
+      if (!deceasedMembers.length) {
+        container.innerHTML = `<p class="muted">No memorial profiles have been added yet.</p>`;
+        return;
+      }
+      container.innerHTML = deceasedMembers.map(m => `
+        <div class="card" style="display:flex; gap:18px; align-items:flex-start;">
+          <img src="${m.photo_url || ''}" alt="${ftEsc(m.name)}" style="width:72px; height:72px; border-radius:50%; object-fit:cover; border:2px solid var(--accent); flex:none; filter:grayscale(.4);" onerror="this.src='https://placehold.co/150x150/0f161e/d4af37?text=%F0%9F%95%8A%EF%B8%8F'">
+          <div>
+            <h3 style="font-size:19px; margin-bottom:2px;">${ftEsc(m.name)}</h3>
+            <div class="muted" style="font-size:12px; margin-bottom:8px;">${ftEsc(formatLifeYears(m) || '')}${m.home_region ? ' · ' + ftEsc(m.home_region) : ''}</div>
+            <p style="font-size:14px; color:var(--muted);">${ftEsc(m.bio || 'Forever remembered and cherished by the Thukalil family.')}</p>
+          </div>
+        </div>
+      `).join('');
     }
 
     /* =====================================================================
@@ -2201,12 +2487,49 @@
       $("#btnTabLog").className = tab === 'log' ? 'btn' : 'btn btn-outline';
     }
 
-    // Build a clean { platform: url } object from a lookup function, dropping empties
+    // Living vs. In Loving Memory toggle on the registration form.
+    // A memorial profile skips the password (no login) and can optionally
+    // carry a date of passing; a living profile keeps full account access
+    // and the business section, neither of which makes sense for the dead.
+    function setRegLifeStatus(isDeceased) {
+      $("#regIsDeceased").value = isDeceased ? "true" : "false";
+      $("#regToggleAlive").classList.toggle("on", !isDeceased);
+      $("#regToggleDeceased").classList.toggle("on", isDeceased);
+
+      $("#regDopWrap").style.display = isDeceased ? "block" : "none";
+      $("#regPasswordWrap").style.display = isDeceased ? "none" : "block";
+      $("#regPasswordNote").style.display = isDeceased ? "block" : "none";
+      $("#regPasswordInput").required = !isDeceased;
+
+      $("#regPhotoFile").required = !isDeceased;
+      $("#regPhotoLabel").textContent = isDeceased ? "Photo (optional — if one survives)" : "Photo (Select File from PC) *";
+
+      $("#regBusinessToggleWrap").style.display = isDeceased ? "none" : "block";
+      $("#regBusinessFields").style.display = (isDeceased || !$("#regHasBusiness").checked) ? "none" : "block";
+      if (isDeceased) $("#regHasBusiness").checked = false;
+
+      $("#regLifeStatusNote").textContent = isDeceased
+        ? "Adding a beloved relative who has passed on. They'll appear in the family tree and the In Loving Memory wall — no login is created for them."
+        : "Registering yourself or another living relative. They'll be able to log in and manage their own profile once verified.";
+
+      $("#regSubmitBtn").textContent = isDeceased ? "Add to the Family Tree & Memorial Wall" : "Submit for Lineage Verification";
+    }
+
+    function toggleBusinessFields(checked) {
+      $("#regBusinessFields").style.display = checked ? "block" : "none";
+    }
+    function toggleMyInfoBusinessFields(checked) {
+      $("#myInfoBusinessFields").style.display = checked ? "block" : "none";
+    }
+
+    // Build a clean { platform: url } object from a lookup function, dropping
+    // empties and normalizing every value into a real absolute URL so links
+    // actually navigate instead of silently resolving relative to this page.
     function buildSocialLinks(get) {
       const platforms = ["instagram", "facebook", "linkedin", "x", "youtube", "website"];
       const out = {};
       platforms.forEach(p => {
-        const v = (get(p) || "").trim();
+        const v = normalizeSocialUrl(p, get(p));
         if (v) out[p] = v;
       });
       return out;
@@ -2219,21 +2542,38 @@
       msg.textContent = "Submitting registration details...";
 
       const fd = new FormData(e.target);
+      const isDeceased = $("#regIsDeceased").value === "true";
+      const hasBusiness = !isDeceased && $("#regHasBusiness").checked;
+
       const newMember = {
         name: fd.get("name"),
         father_name: fd.get("father_name"),
         mother_name: fd.get("mother_name"),
-        password: fd.get("password"),
-        photo_url: fd.get("photo_url"),
+        password: isDeceased ? null : (fd.get("password") || null),
+        photo_url: fd.get("photo_url") || null,
         branch: fd.get("branch") || "",
         bio: fd.get("bio") || "",
+        home_region: fd.get("home_region") || "",
+        hobbies: fd.get("hobbies") || "",
+        mobile_number: fd.get("mobile_number") || "",
+        email: fd.get("email") || "",
+        is_deceased: isDeceased,
+        date_of_birth: fd.get("date_of_birth") || null,
+        date_of_passing: isDeceased ? (fd.get("date_of_passing") || null) : null,
+        has_business: hasBusiness,
+        business_name: hasBusiness ? (fd.get("business_name") || "") : "",
+        business_origin: hasBusiness ? (fd.get("business_origin") || "") : "",
+        business_industry: hasBusiness ? (fd.get("business_industry") || "") : "",
+        business_details: hasBusiness ? (fd.get("business_details") || "") : "",
         social_links: buildSocialLinks(p => fd.get("social_" + p)),
         status: "pending"
       };
 
       if (db.isReady()) {
         const success = await db.insert("family_members", newMember);
-        msg.textContent = success ? "Registration complete! Waiting for confirmation from council. ✓" : "Submission error.";
+        msg.textContent = success
+          ? (isDeceased ? "Added to the family tree and memorial wall! Awaiting council confirmation. ✓" : "Registration complete! Waiting for confirmation from council. ✓")
+          : "Submission error.";
       } else {
         newMember.id = Date.now().toString();
         currentMembers.push(newMember);
@@ -2243,6 +2583,8 @@
       if (msg.textContent.includes("✓")) {
         e.target.reset();
         $("#regPhotoPrev").style.display = "none";
+        setRegLifeStatus(false);
+        toggleBusinessFields(false);
       }
     });
 
@@ -2324,7 +2666,20 @@
         $("#myInfoPhotoPrev").style.display = "block";
       }
       $("#myInfoBranch").value = loggedInUser.branch || "";
+      $("#myInfoHomeRegion").value = loggedInUser.home_region || "";
+      $("#myInfoHobbies").value = loggedInUser.hobbies || "";
       $("#myInfoBio").value = loggedInUser.bio || "";
+      $("#myInfoDob").value = loggedInUser.date_of_birth || "";
+      $("#myInfoMobile").value = loggedInUser.mobile_number || "";
+      $("#myInfoEmail").value = loggedInUser.email || "";
+
+      const hasBiz = !!loggedInUser.has_business;
+      $("#myInfoHasBusiness").checked = hasBiz;
+      $("#myInfoBusinessFields").style.display = hasBiz ? "block" : "none";
+      $("#myInfoBusinessName").value = loggedInUser.business_name || "";
+      $("#myInfoBusinessOrigin").value = loggedInUser.business_origin || "";
+      $("#myInfoBusinessIndustry").value = loggedInUser.business_industry || "";
+      $("#myInfoBusinessDetails").value = loggedInUser.business_details || "";
 
       let social = loggedInUser.social_links || {};
       if (typeof social === "string") { try { social = JSON.parse(social); } catch (e) { social = {}; } }
@@ -2343,11 +2698,22 @@
       msg.textContent = "Updating profile...";
 
       const socialIds = { instagram: "myInfoSocialInstagram", facebook: "myInfoSocialFacebook", linkedin: "myInfoSocialLinkedin", x: "myInfoSocialX", youtube: "myInfoSocialYoutube", website: "myInfoSocialWebsite" };
+      const hasBiz = $("#myInfoHasBusiness").checked;
       const updates = {
         name: $("#myInfoName").value,
         photo_url: $("#myInfoPhoto").value,
         branch: $("#myInfoBranch").value,
+        home_region: $("#myInfoHomeRegion").value,
+        hobbies: $("#myInfoHobbies").value,
         bio: $("#myInfoBio").value,
+        date_of_birth: $("#myInfoDob").value || null,
+        mobile_number: $("#myInfoMobile").value,
+        email: $("#myInfoEmail").value,
+        has_business: hasBiz,
+        business_name: hasBiz ? $("#myInfoBusinessName").value : "",
+        business_origin: hasBiz ? $("#myInfoBusinessOrigin").value : "",
+        business_industry: hasBiz ? $("#myInfoBusinessIndustry").value : "",
+        business_details: hasBiz ? $("#myInfoBusinessDetails").value : "",
         social_links: buildSocialLinks(p => $("#" + socialIds[p]).value)
       };
 
@@ -2440,10 +2806,12 @@
       }
       container.innerHTML = list.map(m => `
         <div class="card" style="display: flex; flex-direction: column; gap: 10px;">
-          <span class="admin-badge badge-verified">Verified</span>
-          <img src="${m.photo_url}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px;" onerror="this.src='https://placehold.co/300x160/0f161e/d4af37?text=Thukalil+Member'">
+          <span class="admin-badge badge-verified">${m.is_deceased ? '🕊️ In Loving Memory' : 'Verified'}</span>
+          <img src="${m.photo_url || ''}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px;" onerror="this.src='https://placehold.co/300x160/0f161e/d4af37?text=Thukalil+Member'">
           <h3 style="margin: 0; font-size: 20px;">${m.name}</h3>
+          ${formatLifeYears(m) ? `<div style="font-size:12px; color:var(--muted); margin-top:-6px;">${formatLifeYears(m)}</div>` : ''}
           <p style="font-size: 13px;"><strong>Father:</strong> ${m.father_name}<br><strong>Mother:</strong> ${m.mother_name}</p>
+          ${m.home_region ? `<p style="font-size: 12px; color: var(--accent);">🌍 ${m.home_region}</p>` : ''}
           ${m.branch ? `<p style="font-size: 12px; color: var(--accent);">📍 ${m.branch}</p>` : ''}
           <div style="display: flex; gap: 10px; margin-top: auto;">
             <button class="btn btn-danger" style="padding: 8px 16px; font-size: 13px;" onclick="removeRegisteredMember('${m.id}')">Remove from Tree</button>
@@ -2489,10 +2857,14 @@
 
       container.innerHTML = pendings.map(m => `
         <div class="card" style="display: flex; flex-direction: column; gap: 10px;">
-          <span class="admin-badge badge-pending">Pending Approval</span>
-          <img src="${m.photo_url}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px;" onerror="this.src='https://placehold.co/300x160/0f161e/d4af37?text=Applicant'">
+          <span class="admin-badge badge-pending">${m.is_deceased ? '🕊️ In Loving Memory — Pending' : 'Pending Approval'}</span>
+          <img src="${m.photo_url || ''}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 10px;" onerror="this.src='https://placehold.co/300x160/0f161e/d4af37?text=Applicant'">
           <h3 style="margin: 0; font-size: 20px;">${m.name}</h3>
+          ${formatLifeYears(m) ? `<div style="font-size:12px; color:var(--muted); margin-top:-6px;">${formatLifeYears(m)}</div>` : ''}
           <p style="font-size: 13px;"><strong>Father:</strong> ${m.father_name}<br><strong>Mother:</strong> ${m.mother_name}</p>
+          ${m.home_region ? `<p style="font-size: 12px; color: var(--accent);">🌍 ${m.home_region}</p>` : ''}
+          ${m.hobbies ? `<p style="font-size: 12px; color: var(--muted);"><strong>Hobbies:</strong> ${m.hobbies}</p>` : ''}
+          ${m.has_business && m.business_name ? `<p style="font-size: 12px; color: var(--accent2);">💼 ${m.business_name}</p>` : ''}
           <p style="font-size: 13px; color: var(--muted);">${m.bio || 'No bio provided'}</p>
           <div style="display: flex; gap: 10px; margin-top: 10px;">
             <button class="btn" style="padding: 8px 16px; font-size: 13px;" onclick="verifyMember('${m.id}')">Verify & Add to Tree</button>
@@ -2686,6 +3058,15 @@
     loadAchievements();
     loadGuestbook();
     loadHomeFeatures();
+    // loadHomeFeatures() above can run before loadMembers() has replaced the
+    // placeholder demo data, so once real member data is in, refresh the two
+    // sections that depend on it (region grid + memorial wall) without
+    // re-querying achievements/guestbook a second time.
+    membersReady.then(() => {
+      const verified = currentMembers.filter(m => m.status === 'verified');
+      renderRegionGrid(verified);
+      renderMemorialWall(verified.filter(m => m.is_deceased));
+    });
   </script>
 
 </body>
