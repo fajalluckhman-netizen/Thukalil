@@ -1416,14 +1416,6 @@
     <button class="admin-lock-btn" onclick="showPage('web-admin')" title="Admin Portal Access">🔒</button>
   </footer>
 
-  <!-- Memorial tribute-photo modal -- placed outside every .page section
-       (unlike #kinModal, which lives inside the Family Tree page and is
-       only ever opened from there) so it's reachable from the Memorial
-       Wall on the Home page regardless of which tab is active. -->
-  <div class="kin-modal" id="memModal" onclick="if(event.target===this)closeMemModal()">
-    <div class="kin-box" id="memBox" style="max-width:560px;"></div>
-  </div>
-
   <!-- ==================== APPLICATION SCRIPT ==================== -->
   <script>
     /* 
@@ -2301,7 +2293,11 @@
       // it never reads as if it belongs to the person above it.
       if (extra && extra.indexOf("spouse") !== -1 && !p.parentKey) sub = sub ? `Married in · ${sub}` : "Married into the family";
       const badge = p.children.length ? `<span class="fbadge" title="${p.children.length} child(ren)">${p.children.length}</span>` : "";
-      const img = m && m.photo_url ? `<img src="${ftEsc(m.photo_url)}" alt="" loading="lazy" onerror="this.style.display='none'">` : "";
+      // For an "In Loving Memory" profile, prefer whatever tribute photo was
+      // added first (see memorialCoverPhoto) so a crowd-added photo shows
+      // right on the tree box itself, not just inside the popup.
+      const photoSrc = m && m.is_deceased ? memorialCoverPhoto(m) : (m && m.photo_url);
+      const img = photoSrc ? `<img src="${ftEsc(photoSrc)}" alt="" loading="lazy" onerror="this.style.display='none'">` : "";
       const deceasedCls = m && m.is_deceased ? "deceased" : "";
       const dove = m && m.is_deceased ? `<span class="fbadge" title="In Loving Memory" style="right:auto; left:-4px; background:rgb(var(--deep-rgb));">🕊️</span>` : "";
       return `<button type="button" class="fnode ${m ? "" : "ghost"} ${deceasedCls} ${extra || ""}" data-key="${ftEsc(p.key)}" data-s="${ftEsc(p.search)}" aria-label="${ftEsc(p.name)}">
@@ -2420,7 +2416,10 @@
       const spouses = [...p.spouses].map(byKey).filter(Boolean);
       const husband = p.spouseOf && byKey(p.spouseOf);
       const rel = (title, items) => items.length ? `<div class="kin-rel"><b>${title}</b>${items.join("")}</div>` : "";
-      const photo = m && m.photo_url ? `<img class="kin-photo" src="${ftEsc(m.photo_url)}" alt="" onerror="this.style.display='none'">` : `<div class="kin-photo finit" style="display:flex;align-items:center;justify-content:center;font-size:40px;">${ftEsc(p.name.charAt(0).toUpperCase())}</div>`;
+      // For an "In Loving Memory" profile, show whichever tribute photo was
+      // added first (see memorialCoverPhoto) as the main photo here too.
+      const photoSrc = m && m.is_deceased ? memorialCoverPhoto(m) : (m && m.photo_url);
+      const photo = photoSrc ? `<img class="kin-photo" src="${ftEsc(photoSrc)}" alt="" onerror="this.style.display='none'">` : `<div class="kin-photo finit" style="display:flex;align-items:center;justify-content:center;font-size:40px;">${ftEsc(p.name.charAt(0).toUpperCase())}</div>`;
       const years = m ? formatLifeYears(m) : "";
       $("#kinBox").innerHTML = `
         <button class="kin-close" onclick="closeKin()" aria-label="Close">×</button>
@@ -2437,8 +2436,34 @@
         ${rel("In-Laws", m ? [m.father_in_law_name ? `<span class="kin-plain">${ftEsc(m.father_in_law_name)}</span>` : "", m.mother_in_law_name ? `<span class="kin-plain">${ftEsc(m.mother_in_law_name)}</span>` : ""].filter(Boolean) : [])}
         ${rel("Brothers & Sisters", sibs.map(link))}
         ${rel(husband ? "Married to" : "Spouse", (husband ? [husband] : spouses).map(link))}
-        ${rel("Children", p.children.map(link))}`;
+        ${rel("Children", p.children.map(link))}
+        ${m && m.is_deceased ? renderTributeGallery(p) : ""}`;
       $("#kinModal").classList.add("open");
+    }
+
+    // Tribute-photo gallery + "Add a Photo" control, shown inside the
+    // relatives popup for an "In Loving Memory" profile only -- clicking
+    // that person's box in the Family Tree is how anyone adds a photo.
+    function renderTributeGallery(p) {
+      const m = p.member;
+      const tributes = memorialPhotosByMember[m.id] || [];
+      return `
+        <div class="kin-rel">
+          <b>Tribute Photos</b>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+            ${tributes.length ? tributes.map((ph, i) => `
+              <div style="position:relative;">
+                <img src="${ftEsc(ph.photo_url)}" alt="" style="width:64px; height:64px; object-fit:cover; border-radius:10px; border:2px solid ${i === 0 ? "var(--accent)" : "var(--line)"};" onerror="this.style.display='none'">
+                ${i === 0 ? `<span class="fbadge" style="position:absolute; bottom:-6px; right:-6px; width:auto; padding:0 5px; font-size:8px;" title="Oldest photo -- shown on this person's card">Cover</span>` : ""}
+              </div>
+            `).join("") : `<p class="muted" style="font-size:12px;">No tribute photos yet -- be the first to add one.</p>`}
+          </div>
+          <label class="btn btn-outline" style="cursor:pointer; display:inline-block; font-size:13px; padding:8px 16px;">
+            + Add a Photo
+            <input type="file" accept="image/*" style="display:none" onchange="submitMemorialPhoto(event, '${m.id}', '${ftEsc(p.key)}')">
+          </label>
+          <p class="muted" style="font-size:11px; margin-top:8px;">The first photo ever added becomes the one shown on this person's tree box.</p>
+        </div>`;
     }
     function closeKin() { $("#kinModal").classList.remove("open"); }
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeKin(); });
@@ -2683,6 +2708,9 @@
     }
 
     // The Memorial Wall -- every verified member marked "In Loving Memory".
+    // Adding a photo happens from the Family Tree (click the person's box),
+    // not from here -- this grid just displays whatever cover photo that
+    // produced, same as it always has.
     function renderMemorialWall(deceasedMembers) {
       const container = $("#memorialWallGrid");
       if (!container) return;
@@ -2691,46 +2719,21 @@
         return;
       }
       container.innerHTML = deceasedMembers.map(m => `
-        <div class="card" style="display:flex; gap:18px; align-items:flex-start; cursor:pointer;" onclick="openMemorialPhotos('${m.id}')" title="Click to view or add a photo">
+        <div class="card" style="display:flex; gap:18px; align-items:flex-start;">
           <img src="${ftEsc(memorialCoverPhoto(m))}" alt="${ftEsc(m.name)}" style="width:72px; height:72px; border-radius:50%; object-fit:cover; border:2px solid var(--accent); flex:none; filter:grayscale(.4);" onerror="this.src='https://placehold.co/150x150/0f161e/d4af37?text=%F0%9F%95%8A%EF%B8%8F'">
           <div>
             <h3 style="font-size:19px; margin-bottom:2px;">${ftEsc(m.name)}</h3>
             <div class="muted" style="font-size:12px; margin-bottom:8px;">${ftEsc(formatLifeYears(m) || '')}${m.home_region ? ' · ' + ftEsc(m.home_region) : ''}</div>
             <p style="font-size:14px; color:var(--muted);">${ftEsc(m.bio || 'Forever remembered and cherished by the Thukalil family.')}</p>
-            <p class="muted" style="font-size:11px; margin-top:8px;">📷 Click to view or add a photo</p>
           </div>
         </div>
       `).join('');
     }
 
-    function openMemorialPhotos(memberId) {
-      const m = currentMembers.find(x => String(x.id) === String(memberId));
-      if (!m) return;
-      const tributes = memorialPhotosByMember[memberId] || [];
-      $("#memBox").innerHTML = `
-        <button class="kin-close" onclick="closeMemModal()" aria-label="Close">×</button>
-        <h3>${ftEsc(m.name)}</h3>
-        <div class="muted" style="font-size:13px; margin-top:-4px; margin-bottom:14px;">${ftEsc(formatLifeYears(m) || '')} · In Loving Memory</div>
-        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:18px;">
-          ${tributes.length ? tributes.map((p, i) => `
-            <div style="position:relative;">
-              <img src="${ftEsc(p.photo_url)}" alt="" style="width:96px; height:96px; object-fit:cover; border-radius:12px; border:2px solid ${i === 0 ? 'var(--accent)' : 'var(--line)'};" onerror="this.style.display='none'">
-              ${i === 0 ? `<span class="fbadge" style="position:absolute; bottom:-6px; right:-6px; width:auto; padding:0 6px; font-size:9px;" title="Oldest photo -- shown on the memorial wall">Cover</span>` : ''}
-            </div>
-          `).join('') : `<p class="muted" style="font-size:13px;">No tribute photos added yet -- be the first to add one.</p>`}
-        </div>
-        <label class="btn btn-outline" style="cursor:pointer; display:inline-block;">
-          + Add a Photo
-          <input type="file" accept="image/*" style="display:none" onchange="submitMemorialPhoto(event, '${memberId}')">
-        </label>
-        <p class="muted" style="font-size:11px; margin-top:10px;">The first photo ever added becomes the one shown on the memorial wall.</p>
-      `;
-      $("#memModal").classList.add("open");
-    }
-
-    function closeMemModal() { $("#memModal").classList.remove("open"); }
-
-    async function submitMemorialPhoto(e, memberId) {
+    // Fired from the "+ Add a Photo" control inside the Family Tree's
+    // relatives popup (renderTributeGallery, above). treeKey re-opens that
+    // same popup afterwards so the person adding the photo sees it land.
+    async function submitMemorialPhoto(e, memberId, treeKey) {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -2745,8 +2748,9 @@
           row.created_at = new Date().toISOString();
           (memorialPhotosByMember[memberId] = memorialPhotosByMember[memberId] || []).push(row);
         }
-        openMemorialPhotos(memberId);
-        renderMemorialWall(currentMembers.filter(m => m.status === 'verified' && m.is_deceased));
+        renderFamilyTree(currentMembers);
+        renderMemorialWall(currentMembers.filter(mm => mm.status === 'verified' && mm.is_deceased));
+        if (treeKey) openKin(treeKey);
       };
       reader.readAsDataURL(file);
     }
